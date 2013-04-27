@@ -125,7 +125,10 @@ namespace gpu
 		if (!tex)
 			return 0;
 
-		// eek
+		if (FAILED(gDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &tex->tex, 0))) {
+			delete tex;
+			return 0;
+		}
 
 		return tex;
 	}
@@ -139,30 +142,67 @@ namespace gpu
 		}
 	}
 
-	void SetTexture(Texture2d* tex)
+	void SetSampler(int slot, bool tex_clamp, bool bilin)
 	{
-		if (tex)
-		{
-			gDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-			gDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+		gDevice->SetSamplerState(slot, D3DSAMP_ADDRESSU, tex_clamp ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);
+		gDevice->SetSamplerState(slot, D3DSAMP_ADDRESSV, tex_clamp ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);
 
-			gDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-			gDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-			gDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+		gDevice->SetSamplerState(slot, D3DSAMP_MINFILTER, bilin ? D3DTEXF_LINEAR : D3DTEXF_POINT);
+		gDevice->SetSamplerState(slot, D3DSAMP_MAGFILTER, bilin ? D3DTEXF_LINEAR : D3DTEXF_POINT);
+		gDevice->SetSamplerState(slot, D3DSAMP_MIPFILTER, bilin ? D3DTEXF_LINEAR : D3DTEXF_POINT);
+	}
 
-			gDevice->SetTexture(0, tex->tex);
-		}
+	void SetTexture(int slot, Texture2d* tex)
+	{
+		gDevice->SetTexture(slot, tex ? tex->tex : 0);
 	}
 
 	// Drawing
 
+	IDirect3DSurface9* g_default_render_target;
+
 	void Init()
 	{
+		gDevice->GetRenderTarget(0, &g_default_render_target);
 	}
 
 	void Clear(uint32_t col)
 	{
 		gDevice->Clear(0, 0, D3DCLEAR_TARGET, col, 1.0f, 0);
+	}
+
+	void SetRenderTarget(Texture2d* tex)
+	{
+		if (!tex)
+			return;
+
+		IDirect3DSurface9* surf = 0;
+
+		if (FAILED(tex->tex->GetSurfaceLevel(0, &surf)))
+			return;
+
+		gDevice->SetRenderTarget(0, surf);
+
+		surf->Release();
+	}
+
+	void SetDefaultRenderTarget()
+	{
+		gDevice->SetRenderTarget(0, g_default_render_target);
+	}
+
+	void SetViewport(ivec2 pos, ivec2 size, vec2 depth)
+	{
+		D3DVIEWPORT9 vp;
+
+		vp.Width = size.x;
+		vp.Height = size.y;
+		vp.MinZ = depth.x;
+		vp.MaxZ = depth.y;
+		vp.X = pos.x;
+		vp.Y = pos.y;
+
+		gDevice->SetViewport(&vp);
 	}
 
 	void SetVsConst(int slot, vec4 v)
@@ -175,7 +215,7 @@ namespace gpu
 		gDevice->SetPixelShaderConstantF(slot, (float*)&v, 1);
 	}
 
-	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count)
+	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count, bool alpha_blend)
 	{
 		if (!decl || !vb)
 			return;
@@ -185,11 +225,15 @@ namespace gpu
 
 		gDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
-		gDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		gDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, FALSE);
-		gDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-		gDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-		gDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		if (alpha_blend) {
+			gDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			gDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, FALSE);
+			gDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+			gDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+			gDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		} else {
+			gDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+		}
 
 		gDevice->SetVertexDeclaration(decl->decl);
 		gDevice->SetStreamSource(0, vb->vb, 0, sizeof(Vertex));

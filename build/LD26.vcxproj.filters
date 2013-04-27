@@ -21,6 +21,18 @@
     <FxCompile Include="..\shaders\quad_vs.hlsl">
       <Filter>shaders</Filter>
     </FxCompile>
+    <FxCompile Include="..\shaders\blur_x_ps.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\shaders\blur_y_ps.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\shaders\combine_ps.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\shaders\reduce_ps.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Common.h">
@@ -55,9 +67,6 @@
     <ClCompile Include="..\src\Game.cpp">
       <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Gpu.cpp">
-      <Filter>game</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Map.cpp">
       <Filter>game</Filter>
     </ClCompile>
@@ -66,6 +75,9 @@
     </ClCompile>
     <ClCompile Include="..\src\Effects.cpp">
       <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Gpu.cpp">
+      <Filter>sys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

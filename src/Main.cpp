@@ -141,16 +141,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Panic("D3D CreateDevice failed - do you have D3D9 installed?");
 	}
 
-	D3DVIEWPORT9 vp;
-    vp.Width = kWinWidth;
-    vp.Height = kWinHeight;
-    vp.MinZ = 0.0f;
-    vp.MaxZ = 1.0f;
-    vp.X = 0;
-    vp.Y = 0;
-
-	gDevice->SetViewport(&vp);
-
 	gpu::Init();
 
 	// Audio

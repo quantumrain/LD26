@@ -10,6 +10,10 @@ int hash(const uint8_t* data, int size) {
 	return h;
 }
 
+float gaussian(float n, float theta) {
+	return ((1.0f / sqrtf(2.0f * 3.14159f * theta)) * expf(-(n * n) / (2.0f * theta * theta)));   
+}
+
 bool load_file(file_buf* fb, const char* path) {
 	fb->destroy();
 

@@ -38,7 +38,8 @@ struct vec4
 struct ivec2 {
 	int x, y;
 
-	ivec2(int x_ = 0, int y_ = 0) : x(x_), y(y_) { }
+	ivec2(int xy = 0) : x(xy), y(xy) { }
+	ivec2(int x_, int y_) : x(x_), y(y_) { }
 };
 
 inline vec2 operator+(const vec2& lhs, const vec2& rhs) { return vec2(lhs.x + rhs.x, lhs.y + rhs.y); }
@@ -52,6 +53,18 @@ inline vec2& operator+=(vec2& lhs, const vec2& rhs) { lhs.x += rhs.x; lhs.y += r
 inline vec2& operator-=(vec2& lhs, const vec2& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
 inline vec2& operator*=(vec2& lhs, const vec2& rhs) { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
 inline vec2& operator/=(vec2& lhs, const vec2& rhs) { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
+
+inline vec4 operator+(const vec4& lhs, const vec4& rhs) { return vec4(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w); }
+inline vec4 operator-(const vec4& lhs, const vec4& rhs) { return vec4(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w); }
+inline vec4 operator*(const vec4& lhs, const vec4& rhs) { return vec4(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w); }
+inline vec4 operator/(const vec4& lhs, const vec4& rhs) { return vec4(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z, lhs.w / rhs.w); }
+
+inline vec4 operator-(const vec4& rhs) { return vec4(-rhs.x, -rhs.y, -rhs.z, -rhs.w); }
+
+inline vec4& operator+=(vec4& lhs, const vec4& rhs) { lhs.x += rhs.x; lhs.y += rhs.y; lhs.z += rhs.z; lhs.w += rhs.w; return lhs; }
+inline vec4& operator-=(vec4& lhs, const vec4& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; lhs.z -= rhs.z; lhs.w -= rhs.w; return lhs; }
+inline vec4& operator*=(vec4& lhs, const vec4& rhs) { lhs.x *= rhs.x; lhs.y *= rhs.y; lhs.z *= rhs.z; lhs.w *= rhs.w; return lhs; }
+inline vec4& operator/=(vec4& lhs, const vec4& rhs) { lhs.x /= rhs.x; lhs.y /= rhs.y; lhs.z /= rhs.z; lhs.w /= rhs.w; return lhs; }
 
 inline ivec2 operator+(const ivec2& lhs, const ivec2& rhs) { return ivec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 inline ivec2 operator-(const ivec2& lhs, const ivec2& rhs) { return ivec2(lhs.x - rhs.x, lhs.y - rhs.y); }
@@ -90,6 +103,7 @@ inline float SignedFRand(float mag) { return FRand(2.0f * mag) - mag; }
 inline vec2 RandBox(float magX, float magY) { return vec2(SignedFRand(magX), SignedFRand(magY)); }
 
 int hash(const uint8_t* data, int size);
+float gaussian(float n, float theta);
 
 inline bool OverlapsRect(vec2 c0, vec2 s0, vec2 c1, vec2 s1)
 {
@@ -150,13 +164,17 @@ namespace gpu
 
 	Texture2d* CreateTexture2d(int width, int height);
 	void DestroyTexture2d(Texture2d* tex);
-	void SetTexture(Texture2d* tex);
+	void SetSampler(int slot, bool tex_clamp, bool bilin);
+	void SetTexture(int slot, Texture2d* tex);
 
 	void Init();
 	void Clear(uint32_t col);
+	void SetViewport(ivec2 pos, ivec2 size, vec2 depth);
+	void SetRenderTarget(Texture2d* tex);
+	void SetDefaultRenderTarget();
 	void SetPsConst(int slot, vec4 v);
 	void SetVsConst(int slot, vec4 v);
-	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count);
+	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count, bool alpha_blend);
 
 }
 

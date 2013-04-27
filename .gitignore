@@ -33,5 +33,5 @@
 obj
 
 # Code stuff
-ShaderPsh.h
-ShaderVSh.h
+build/shaders/*.h
+*.PIXExp
