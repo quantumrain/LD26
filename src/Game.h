@@ -15,6 +15,9 @@ struct map {
 	colour colours[MAX_WORMS];
 	ivec2 targets[MAX_WORMS];
 
+	ivec2 tl;
+	ivec2 br;
+
 	map() : data() { }
 	~map() { destroy(); }
 

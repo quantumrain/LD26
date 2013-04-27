@@ -127,6 +127,9 @@
   <ItemGroup>
     <Text Include="..\data\map0.txt" />
     <Text Include="..\data\map1.txt" />
+    <Text Include="..\data\map2.txt" />
+    <Text Include="..\data\map3.txt" />
+    <Text Include="..\data\map4.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

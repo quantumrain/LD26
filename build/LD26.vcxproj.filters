@@ -72,5 +72,14 @@
     <Text Include="..\data\map1.txt">
       <Filter>maps</Filter>
     </Text>
+    <Text Include="..\data\map2.txt">
+      <Filter>maps</Filter>
+    </Text>
+    <Text Include="..\data\map3.txt">
+      <Filter>maps</Filter>
+    </Text>
+    <Text Include="..\data\map4.txt">
+      <Filter>maps</Filter>
+    </Text>
   </ItemGroup>
 </Project>

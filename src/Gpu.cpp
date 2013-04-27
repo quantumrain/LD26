@@ -183,6 +183,8 @@ namespace gpu
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;
 
+		gDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
 		gDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		gDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, FALSE);
 		gDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);

@@ -1,10 +1,14 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+const float DT = 1.0f / 60.0f;
+
 template<typename T> T Max(T a, T b) { return (b < a) ? a : b; }
 template<typename T> T Min(T a, T b) { return (a < b) ? a : b; }
 template<typename T> T Clamp(T v, T low, T high) { return (v < low) ? low : ((v > high) ? high : v); }
 template<typename T> T Lerp(T a, T b, float t) { return a + (b - a) * t; }
+
+inline float Square(float f) { return f * f; }
 
 template<typename T> void Swap(T& a, T& b)
 {
@@ -64,6 +68,7 @@ inline ivec2& operator/=(ivec2& lhs, const ivec2& rhs) { lhs.x /= rhs.x; lhs.y /
 inline bool operator==(ivec2& lhs, ivec2& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y; }
 inline bool operator!=(ivec2& lhs, ivec2& rhs) { return lhs.x != rhs.x || lhs.y != rhs.y; }
 
+inline vec2 to_vec2(ivec2 v) { return vec2((float)v.x, (float)v.y); }
 inline vec2 Rotation(float a) { return vec2(cosf(a), sinf(a)); }
 
 struct colour
@@ -112,7 +117,8 @@ enum key_press {
 	KEY_8,
 	KEY_9,
 	KEY_0,
-	KEY_RESET
+	KEY_RESET,
+	KEY_CHEAT
 };
 
 extern int gKey;

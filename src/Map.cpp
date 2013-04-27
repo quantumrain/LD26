@@ -8,15 +8,11 @@ void map::destroy() {
 	data = 0;
 }
 
-vec2 to_screen(ivec2 v) {
-	return vec2((float)v.x, (float)-v.y);
-}
-
 ivec2 measure_map(const uint8_t* p, const uint8_t* e) {
 	ivec2 size(0, 0);
 
 	for(; p < e; p++) {
-		if (*p != '#')
+		if ((*p != '#') && !(*p >= 'A' && *p <= 'Z'))
 			break;
 
 		int x = 0;
@@ -39,8 +35,8 @@ ivec2 measure_map(const uint8_t* p, const uint8_t* e) {
 void set_map(map* m, player_state* gs, int x, int y, uint8_t c) {
 	bool clear_tile = c == ' ';
 
-	if (c >= '0' && c <= '9') {
-		int num = c - '0';
+	if (c >= '1' && c <= '9') {
+		int num = c - '1';
 
 		if (num < MAX_WORMS) {
 			worm* w = &gs->worms[num];
@@ -66,8 +62,13 @@ void set_map(map* m, player_state* gs, int x, int y, uint8_t c) {
 		}
 	}
 
-	if (clear_tile)
+	if (clear_tile) {
 		m->data[y * m->size.x + x] = TILE_EMPTY;
+		m->tl.x = Min(m->tl.x, x);
+		m->tl.y = Min(m->tl.y, y);
+		m->br.x = Max(m->br.x, x + 1);
+		m->br.y = Max(m->br.y, y + 1);
+	}
 }
 
 bool load_map(map* m, player_state* gs, const char* path) {
@@ -101,8 +102,11 @@ bool load_map(map* m, player_state* gs, const char* path) {
 	const uint8_t* p = fb.data;
 	const uint8_t* e = fb.data + fb.size;
 
+	m->tl = m->size;
+	m->br = ivec2();
+
 	for(int y = 0; p < e; p++, y++) {
-		if (*p != '#')
+		if ((*p != '#') && !(*p >= 'A' && *p <= 'Z'))
 			break;
 
 		int x = 0;
@@ -141,7 +145,7 @@ void render_map(map* m, player_state* gs, vec2 scale) {
 
 	for(int y = 0; y < size.y; y++) {
 		for(int x = 0; x < size.x; x++) {
-			vec2 p0(to_screen(ivec2(x, y)));
+			vec2 p0(to_vec2(ivec2(x, y)));
 			vec2 p1(p0 + vec2(1.0f));
 
 			colour c(0);
@@ -164,7 +168,7 @@ void render_map(map* m, player_state* gs, vec2 scale) {
 		for(int j = 0; j < w->num_blocks; j++) {
 			worm_block* b = w->blocks + j;
 
-			vec2 p0(to_screen(b->pos));
+			vec2 p0(to_vec2(ivec2(b->pos)));
 			vec2 p1(p0 + vec2(1.0f));
 
 			draw_rect(p0 * scale, p1 * scale, m->colours[i] * fade);
@@ -175,7 +179,7 @@ void render_map(map* m, player_state* gs, vec2 scale) {
 		{
 			worm_block* b = w->blocks + w->active_block;
 
-			vec2 p0(to_screen(b->pos) + vec2(0.25f));
+			vec2 p0(to_vec2(ivec2(b->pos)) + vec2(0.25f));
 			vec2 p1(p0 + vec2(0.5f));
 			colour col = (gs->active_worm == i) ? colour(0.0f, 0.5f) : colour(0.0f, 0.1f);
 
@@ -185,7 +189,7 @@ void render_map(map* m, player_state* gs, vec2 scale) {
 		// target
 
 		{
-			vec2 p0(to_screen(m->targets[i]) + vec2(0.1f));
+			vec2 p0(to_vec2(ivec2(m->targets[i])) + vec2(0.1f));
 			vec2 p1(p0 + vec2(0.8f));
 
 			draw_rect(p0 * scale, p1 * scale, m->colours[i] * colour(1.0f, 0.65f));

@@ -54,6 +54,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 				break;
 
 				case 'R':		got_key = KEY_RESET; break;
+				case VK_F1:		got_key = KEY_CHEAT; break;
 
 				case '0':		got_key = KEY_0; break;
 				case '1':		got_key = KEY_1; break;
