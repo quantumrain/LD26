@@ -153,14 +153,10 @@ void SoundInit()
 		return;
 	}
 
-	LoadSound(gXAudio, "data\\select.wav", gSound[kSid_Select]);
-	LoadSound(gXAudio, "data\\back.wav", gSound[kSid_Back]);
-	LoadSound(gXAudio, "data\\jump.wav", gSound[kSid_Jump]);
-	LoadSound(gXAudio, "data\\jump.wav", gSound[kSid_KittenJump]);
-	LoadSound(gXAudio, "data\\land.wav", gSound[kSid_Land]);
-	LoadSound(gXAudio, "data\\dead.wav", gSound[kSid_Dead]);
-	LoadSound(gXAudio, "data\\checkpoint.wav", gSound[kSid_CheckPoint]);
-	LoadSound(gXAudio, "data\\kitten.wav", gSound[kSid_Kitten]);
+	LoadSound(gXAudio, "data\\dit.wav", gSound[kSid_Dit]);
+	LoadSound(gXAudio, "data\\buzz.wav", gSound[kSid_Buzz]);
+	LoadSound(gXAudio, "data\\switch.wav", gSound[kSid_Switch]);
+	LoadSound(gXAudio, "data\\win.wav", gSound[kSid_Win]);
 }
 
 void SoundShutdown()

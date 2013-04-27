@@ -111,7 +111,8 @@ enum key_press {
 	KEY_7,
 	KEY_8,
 	KEY_9,
-	KEY_0
+	KEY_0,
+	KEY_RESET
 };
 
 extern int gKey;
@@ -169,14 +170,10 @@ void draw_rect(vec2 p0, vec2 p1, colour c);
 
 enum SoundId
 {
-	kSid_Select,
-	kSid_Back,
-	kSid_Jump,
-	kSid_KittenJump,
-	kSid_Land,
-	kSid_Dead,
-	kSid_CheckPoint,
-	kSid_Kitten,
+	kSid_Dit,
+	kSid_Buzz,
+	kSid_Switch,
+	kSid_Win,
 	kSid_Max
 };
 

@@ -36,7 +36,7 @@ ivec2 measure_map(const uint8_t* p, const uint8_t* e) {
 	return size;
 }
 
-void set_map(map* m, game_state* gs, int x, int y, uint8_t c) {
+void set_map(map* m, player_state* gs, int x, int y, uint8_t c) {
 	bool clear_tile = c == ' ';
 
 	if (c >= '0' && c <= '9') {
@@ -70,7 +70,7 @@ void set_map(map* m, game_state* gs, int x, int y, uint8_t c) {
 		m->data[y * m->size.x + x] = TILE_EMPTY;
 }
 
-bool load_map(map* m, game_state* gs, const char* path) {
+bool load_map(map* m, player_state* gs, const char* path) {
 	m->destroy();
 	gs->reset();
 
@@ -136,7 +136,7 @@ bool load_map(map* m, game_state* gs, const char* path) {
 	return true;
 }
 
-void render_map(map* m, game_state* gs, vec2 scale) {
+void render_map(map* m, player_state* gs, vec2 scale) {
 	ivec2 size = m->size;
 
 	for(int y = 0; y < size.y; y++) {

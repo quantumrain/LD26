@@ -43,18 +43,23 @@ struct worm {
 	worm() : num_blocks(), active_block(), age() { }
 };
 
-struct game_state {
+struct player_state {
 	int num_worms;
 	int active_worm;
 	worm worms[MAX_WORMS];
 
-	game_state() : num_worms(), active_worm() { }
+	player_state() : num_worms(), active_worm() { }
 
 	void reset();
 };
 
 vec2 to_screen(ivec2 v);
-bool load_map(map* m, game_state* gs, const char* path);
-void render_map(map* m, game_state* gs, vec2 scale);
+bool load_map(map* m, player_state* gs, const char* path);
+void render_map(map* m, player_state* gs, vec2 scale);
+
+int block_at(worm* w, ivec2 pos);
+bool is_open_tile(map* m, player_state* gs, ivec2 pos);
+int next_oldest_block(worm* w, int min_age);
+bool is_player_valid(map* m, player_state* gs);
 
 #endif // GAME_H

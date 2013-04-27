@@ -38,7 +38,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			gHasFocus = wparam != WA_INACTIVE;
 		break;
 
-		case WM_CHAR: {
+		case WM_KEYDOWN: {
 			int got_key = 0;
 
 			switch(LOWORD(wparam)) {
@@ -52,6 +52,8 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 				case VK_RETURN:
 					got_key = (GetKeyState(VK_SHIFT) & 0x8000) ? KEY_ALT_FIRE : KEY_FIRE;
 				break;
+
+				case 'R':		got_key = KEY_RESET; break;
 
 				case '0':		got_key = KEY_0; break;
 				case '1':		got_key = KEY_1; break;
@@ -67,21 +69,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 				case 27:
 					PostQuitMessage(0);
 				break;
-			}
-
-			if (got_key)
-				gKey = got_key;
-		}
-		break;
-
-		case WM_KEYDOWN: {
-			int got_key = 0;
-
-			switch(LOWORD(wparam)) {
-				case VK_UP:		got_key = KEY_UP; break;
-				case VK_DOWN:	got_key = KEY_DOWN; break;
-				case VK_LEFT:	got_key = KEY_LEFT; break;
-				case VK_RIGHT:	got_key = KEY_RIGHT; break;
 			}
 
 			if (got_key)

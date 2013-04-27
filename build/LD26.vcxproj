@@ -113,7 +113,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\Common.cpp" />
     <ClCompile Include="..\src\Game.cpp" />
-    <ClCompile Include="..\src\GameState.cpp" />
+    <ClCompile Include="..\src\PlayerState.cpp" />
     <ClCompile Include="..\src\Gpu.cpp" />
     <ClCompile Include="..\src\Main.cpp" />
     <ClCompile Include="..\src\Map.cpp" />
@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\data\map0.txt" />
+    <Text Include="..\data\map1.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
