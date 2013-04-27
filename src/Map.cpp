@@ -22,7 +22,7 @@ ivec2 measure_map(const uint8_t* p, const uint8_t* e) {
 			p++;
 		}
 
-		if (p < e && ((*p == '\r' && p[1] == '\n') || (*p == '\n' && p[1] == '\r')))
+		if ((p + 1) < e && ((*p == '\r' && p[1] == '\n') || (*p == '\n' && p[1] == '\r')))
 			p++;
 
 		size.x = Max(size.x, x);
@@ -117,7 +117,7 @@ bool load_map(map* m, player_state* gs, const char* path) {
 			p++;
 		}
 
-		if (p < e && ((*p == '\r' && p[1] == '\n') || (*p == '\n' && p[1] == '\r')))
+		if ((p + 1) < e && ((*p == '\r' && p[1] == '\n') || (*p == '\n' && p[1] == '\r')))
 			p++;
 	}
 
