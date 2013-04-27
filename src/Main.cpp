@@ -6,11 +6,7 @@ int kWinWidth	= 1152;
 int kWinHeight	= 640;
 
 bool gHasFocus;
-bool gKeyUp;
-bool gKeyDown;
-bool gKeyLeft;
-bool gKeyRight;
-bool gKeyFire;
+int gKey;
 
 void DebugLn(const char* txt, ...)
 {
@@ -42,10 +38,35 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			gHasFocus = wparam != WA_INACTIVE;
 		break;
 
-		case WM_CHAR:
-			if (LOWORD(wparam) == 27)
-				PostQuitMessage(0);
-		break;
+		case WM_CHAR: {
+			int got_key = 0;
+
+			switch(LOWORD(wparam)) {
+				case VK_UP:		got_key = KEY_UP; break;
+				case VK_DOWN:	got_key = KEY_DOWN; break;
+				case VK_LEFT:	got_key = KEY_LEFT; break;
+				case VK_RIGHT:	got_key = KEY_RIGHT; break;
+				case ' ':		got_key = KEY_FIRE; break;
+				case '0':		got_key = KEY_0; break;
+				case '1':		got_key = KEY_1; break;
+				case '2':		got_key = KEY_2; break;
+				case '3':		got_key = KEY_3; break;
+				case '4':		got_key = KEY_4; break;
+				case '5':		got_key = KEY_5; break;
+				case '6':		got_key = KEY_6; break;
+				case '7':		got_key = KEY_7; break;
+				case '8':		got_key = KEY_8; break;
+				case '9':		got_key = KEY_9; break;
+
+				case 27:
+					PostQuitMessage(0);
+				break;
+			}
+
+			if (got_key)
+				gKey = got_key;
+		}
+		 break;
 
 		case WM_SYSKEYDOWN:
 			if ((GetAsyncKeyState(VK_MENU) & 0x8000) && (GetAsyncKeyState(VK_F4) & 0x8000))
@@ -163,17 +184,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				void RenderPreUpdate();
 				RenderPreUpdate();
 
-				gKeyUp		= gHasFocus && (((GetAsyncKeyState(VK_UP) & 0x8000) != 0) || ((GetAsyncKeyState(locKeyW) & 0x8000) != 0));
-				gKeyDown	= gHasFocus && (((GetAsyncKeyState(VK_DOWN) & 0x8000) != 0) || ((GetAsyncKeyState(locKeyS) & 0x8000) != 0));
-				gKeyLeft	= gHasFocus && (((GetAsyncKeyState(VK_LEFT) & 0x8000) != 0) || ((GetAsyncKeyState(locKeyA) & 0x8000) != 0));
-				gKeyRight	= gHasFocus && (((GetAsyncKeyState(VK_RIGHT) & 0x8000) != 0) || ((GetAsyncKeyState(locKeyD) & 0x8000) != 0));
-				gKeyFire	= gHasFocus && (((GetAsyncKeyState(VK_SPACE) & 0x8000) != 0) || ((GetAsyncKeyState(VK_RETURN) & 0x8000) != 0) || ((GetAsyncKeyState(locKeyZ) & 0x8000) != 0));
-
 				void GameUpdate();
 				GameUpdate();
 
 				void RenderGame();
 				RenderGame();
+
+				gKey = 0;
 
 				gDevice->EndScene();
 				gDevice->Present(0, 0, 0, 0);

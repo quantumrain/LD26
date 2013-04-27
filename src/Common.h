@@ -63,6 +63,8 @@ inline float FRand(float mag) { return ((float)rand() / (float)RAND_MAX) * mag; 
 inline float SignedFRand(float mag) { return FRand(2.0f * mag) - mag; }
 inline vec2 RandBox(float magX, float magY) { return vec2(SignedFRand(magX), SignedFRand(magY)); }
 
+int hash(const uint8_t* data, int size);
+
 inline bool OverlapsRect(vec2 c0, vec2 s0, vec2 c1, vec2 s1)
 {
 	vec2 delta = c1 - c0;
@@ -71,12 +73,26 @@ inline bool OverlapsRect(vec2 c0, vec2 s0, vec2 c1, vec2 s1)
 	return (fabsf(delta.x) < size.x) && (fabsf(delta.y) < size.y);
 }
 
-extern bool gHasFocus;
-extern bool gKeyUp;
-extern bool gKeyDown;
-extern bool gKeyLeft;
-extern bool gKeyRight;
-extern bool gKeyFire;
+enum key_press {
+	KEY_NONE,
+	KEY_UP,
+	KEY_DOWN,
+	KEY_LEFT,
+	KEY_RIGHT,
+	KEY_FIRE,
+	KEY_1,
+	KEY_2,
+	KEY_3,
+	KEY_4,
+	KEY_5,
+	KEY_6,
+	KEY_7,
+	KEY_8,
+	KEY_9,
+	KEY_0
+};
+
+extern int gKey;
 
 // Debug
 

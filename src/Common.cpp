@@ -1,6 +1,15 @@
 #include "Pch.h"
 #include "Common.h"
 
+int hash(const uint8_t* data, int size) {
+	int h = 5381;
+
+	while(size-- > 0)
+		h = h * 33 + *data;
+
+	return h;
+}
+
 bool load_file(file_buf* fb, const char* path) {
 	fb->destroy();
 
