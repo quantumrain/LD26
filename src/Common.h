@@ -31,6 +31,12 @@ struct vec4
 	vec4(vec2 xy, vec2 zw) : x(xy.x), y(xy.y), z(zw.x), w(zw.y) { }
 };
 
+struct ivec2 {
+	int x, y;
+
+	ivec2(int x_ = 0, int y_ = 0) : x(x_), y(y_) { }
+};
+
 inline vec2 operator+(const vec2& lhs, const vec2& rhs) { return vec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 inline vec2 operator-(const vec2& lhs, const vec2& rhs) { return vec2(lhs.x - rhs.x, lhs.y - rhs.y); }
 inline vec2 operator*(const vec2& lhs, const vec2& rhs) { return vec2(lhs.x * rhs.x, lhs.y * rhs.y); }
@@ -42,6 +48,21 @@ inline vec2& operator+=(vec2& lhs, const vec2& rhs) { lhs.x += rhs.x; lhs.y += r
 inline vec2& operator-=(vec2& lhs, const vec2& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
 inline vec2& operator*=(vec2& lhs, const vec2& rhs) { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
 inline vec2& operator/=(vec2& lhs, const vec2& rhs) { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
+
+inline ivec2 operator+(const ivec2& lhs, const ivec2& rhs) { return ivec2(lhs.x + rhs.x, lhs.y + rhs.y); }
+inline ivec2 operator-(const ivec2& lhs, const ivec2& rhs) { return ivec2(lhs.x - rhs.x, lhs.y - rhs.y); }
+inline ivec2 operator*(const ivec2& lhs, const ivec2& rhs) { return ivec2(lhs.x * rhs.x, lhs.y * rhs.y); }
+inline ivec2 operator/(const ivec2& lhs, const ivec2& rhs) { return ivec2(lhs.x / rhs.x, lhs.y / rhs.y); }
+
+inline ivec2 operator-(const ivec2& rhs) { return ivec2(-rhs.x, -rhs.y); }
+
+inline ivec2& operator+=(ivec2& lhs, const ivec2& rhs) { lhs.x += rhs.x; lhs.y += rhs.y; return lhs; }
+inline ivec2& operator-=(ivec2& lhs, const ivec2& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
+inline ivec2& operator*=(ivec2& lhs, const ivec2& rhs) { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
+inline ivec2& operator/=(ivec2& lhs, const ivec2& rhs) { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
+
+inline bool operator==(ivec2& lhs, ivec2& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y; }
+inline bool operator!=(ivec2& lhs, ivec2& rhs) { return lhs.x != rhs.x || lhs.y != rhs.y; }
 
 inline vec2 Rotation(float a) { return vec2(cosf(a), sinf(a)); }
 

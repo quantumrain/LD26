@@ -9,12 +9,6 @@ enum tile {
 	TILE_EMPTY
 };
 
-struct ivec2 {
-	int x, y;
-
-	ivec2(int x_ = 0, int y_ = 0) : x(x_), y(y_) { }
-};
-
 struct map {
 	ivec2 size;
 	uint8_t* data;

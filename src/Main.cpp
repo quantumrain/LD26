@@ -72,7 +72,22 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			if (got_key)
 				gKey = got_key;
 		}
-		 break;
+		break;
+
+		case WM_KEYDOWN: {
+			int got_key = 0;
+
+			switch(LOWORD(wparam)) {
+				case VK_UP:		got_key = KEY_UP; break;
+				case VK_DOWN:	got_key = KEY_DOWN; break;
+				case VK_LEFT:	got_key = KEY_LEFT; break;
+				case VK_RIGHT:	got_key = KEY_RIGHT; break;
+			}
+
+			if (got_key)
+				gKey = got_key;
+		}
+		break;
 
 		case WM_SYSKEYDOWN:
 			if ((GetAsyncKeyState(VK_MENU) & 0x8000) && (GetAsyncKeyState(VK_F4) & 0x8000))

@@ -120,7 +120,7 @@ bool load_map(map* m, game_state* gs, const char* path) {
 	float c0 = 0.45f;
 	float c1 = 0.95f;
 
-	colour cols[MAX_WORMS] = {
+	colour cols[MAX_WORMS] = { // TODO: Colour blind mode
 		colour(c1, c0, c0, 1),
 		colour(c0, c1, c0, 1),
 		colour(c0, c0, c1, 1),
@@ -157,7 +157,7 @@ void render_map(map* m, game_state* gs, vec2 scale) {
 	for(int i = 0; i < gs->num_worms; i++) {
 		worm* w = gs->worms + i;
 
-		// worm
+		// blocks
 
 		for(int j = 0; j < w->num_blocks; j++) {
 			worm_block* b = w->blocks + j;
@@ -168,19 +168,25 @@ void render_map(map* m, game_state* gs, vec2 scale) {
 			draw_rect(p0 * scale, p1 * scale, m->colours[i]);
 		}
 
+		// active block
+
+		{
+			worm_block* b = w->blocks + w->active_block;
+
+			vec2 p0(to_screen(b->pos) + vec2(0.25f));
+			vec2 p1(p0 + vec2(0.5f));
+			colour col = (gs->active_worm == i) ? colour(0.0f, 0.5f) : colour(0.0f, 0.1f);
+
+			draw_rect(p0 * scale, p1 * scale, col);
+		}
+
 		// target
 
-		vec2 p0(to_screen(m->targets[i]) + vec2(0.05f));
-		vec2 p1(p0 + vec2(0.9f));
+		{
+			vec2 p0(to_screen(m->targets[i]) + vec2(0.05f));
+			vec2 p1(p0 + vec2(0.9f));
 
-		draw_rect(p0 * scale, p1 * scale, m->colours[i]);
+			draw_rect(p0 * scale, p1 * scale, m->colours[i]);
+		}
 	}
-
-	worm* w = gs->worms + gs->active_worm;
-	worm_block* b = w->blocks + w->active_block;
-
-	vec2 p0(to_screen(b->pos) + vec2(0.25f));
-	vec2 p1(p0 + vec2(0.5f));
-
-	draw_rect(p0 * scale, p1 * scale, colour(0.0f, 0.5f));
 }
