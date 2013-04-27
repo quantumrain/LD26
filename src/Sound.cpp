@@ -1,5 +1,3 @@
-// Copyright 2012 Stephen Cakebread
-
 #include "Pch.h"
 #include "Common.h"
 
@@ -155,14 +153,14 @@ void SoundInit()
 		return;
 	}
 
-	LoadSound(gXAudio, "audio\\select.wav", gSound[kSid_Select]);
-	LoadSound(gXAudio, "audio\\back.wav", gSound[kSid_Back]);
-	LoadSound(gXAudio, "audio\\jump.wav", gSound[kSid_Jump]);
-	LoadSound(gXAudio, "audio\\jump.wav", gSound[kSid_KittenJump]);
-	LoadSound(gXAudio, "audio\\land.wav", gSound[kSid_Land]);
-	LoadSound(gXAudio, "audio\\dead.wav", gSound[kSid_Dead]);
-	LoadSound(gXAudio, "audio\\checkpoint.wav", gSound[kSid_CheckPoint]);
-	LoadSound(gXAudio, "audio\\kitten.wav", gSound[kSid_Kitten]);
+	LoadSound(gXAudio, "data\\select.wav", gSound[kSid_Select]);
+	LoadSound(gXAudio, "data\\back.wav", gSound[kSid_Back]);
+	LoadSound(gXAudio, "data\\jump.wav", gSound[kSid_Jump]);
+	LoadSound(gXAudio, "data\\jump.wav", gSound[kSid_KittenJump]);
+	LoadSound(gXAudio, "data\\land.wav", gSound[kSid_Land]);
+	LoadSound(gXAudio, "data\\dead.wav", gSound[kSid_Dead]);
+	LoadSound(gXAudio, "data\\checkpoint.wav", gSound[kSid_CheckPoint]);
+	LoadSound(gXAudio, "data\\kitten.wav", gSound[kSid_Kitten]);
 }
 
 void SoundShutdown()

@@ -1,9 +1,5 @@
-// Copyright 2012 Stephen Cakebread
-
 #include "Pch.h"
 #include "Common.h"
-#include "ShaderPsh.h"
-#include "ShaderVsh.h"
 
 extern IDirect3DDevice9* gDevice;
 
@@ -70,7 +66,7 @@ namespace gpu
 		IDirect3DVertexDeclaration9* decl;
 	};
 
-	ShaderDecl* CreateShaderDecl(void* vertexShader, int vertexShaderLength, void* pixelShader, int pixelShaderLength)
+	ShaderDecl* CreateShaderDecl(const BYTE* vertexShader, int vertexShaderLength, const BYTE* pixelShader, int pixelShaderLength)
 	{
 		ShaderDecl* decl = new ShaderDecl;
 
@@ -89,9 +85,9 @@ namespace gpu
 
 		D3DVERTEXELEMENT9 ve[4] =
 		{
-			{ 0, (intptr_t)&((Vertex*)0)->pos, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-			{ 0, (intptr_t)&((Vertex*)0)->uv, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-			{ 0, (intptr_t)&((Vertex*)0)->colour, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
+			{ 0, offsetof(Vertex, x), D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+			{ 0, offsetof(Vertex, u), D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+			{ 0, offsetof(Vertex, r), D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
 			D3DDECL_END()
 		};
 
@@ -122,18 +118,14 @@ namespace gpu
 		IDirect3DTexture9* tex;
 	};
 
-	Texture2d* LoadTexture2d(const char* path)
+	Texture2d* CreateTexture2d(int width, int height)
 	{
 		Texture2d* tex = new Texture2d;
 
 		if (!tex)
 			return 0;
 
-		if (FAILED(D3DXCreateTextureFromFileExA(gDevice, path, 0, 0, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, D3DX_FILTER_NONE, D3DX_FILTER_NONE, 0, 0, 0, &tex->tex)))
-		{
-			delete tex;
-			return 0;
-		}
+		// eek
 
 		return tex;
 	}
@@ -168,9 +160,19 @@ namespace gpu
 	{
 	}
 
-	void Clear(const Colour& colour)
+	void Clear(uint32_t col)
 	{
-		gDevice->Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0);
+		gDevice->Clear(0, 0, D3DCLEAR_TARGET, col, 1.0f, 0);
+	}
+
+	void SetVsConst(int slot, vec4 v)
+	{
+		gDevice->SetVertexShaderConstantF(slot, (float*)&v, 1);
+	}
+
+	void SetPsConst(int slot, vec4 v)
+	{
+		gDevice->SetPixelShaderConstantF(slot, (float*)&v, 1);
 	}
 
 	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count)

@@ -1,5 +1,5 @@
-Texture2D t0;
-SamplerState s0;
+//Texture2D t0;
+//SamplerState s0;
 
 struct VS_OUTPUT
 {
@@ -10,5 +10,5 @@ struct VS_OUTPUT
 
 float4 main(VS_OUTPUT input) : SV_TARGET
 {
-	return t0.Sample(s0, input.uv) * input.colour;
+	return input.colour;
 }

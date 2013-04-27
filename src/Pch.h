@@ -5,13 +5,15 @@
 
 #include <windows.h>
 #include <d3d9.h>
-#include <d3dx9.h>
 #include <xaudio2.h>
-
-#include <stdio.h>
-#include <math.h>
 
 #undef max
 #undef min
+
+#include <stdio.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <math.h>
+
 
 #endif // PCH_H

@@ -1,5 +1,3 @@
-// Copyright 2012 Stephen Cakebread
-
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -15,41 +13,63 @@ template<typename T> void Swap(T& a, T& b)
 	a = t;
 }
 
-struct Vector2
+struct vec2
 {
 	float x, y;
 
-	Vector2(float xy = 0) : x(xy), y(xy) { }
-	Vector2(float x_, float y_) : x(x_), y(y_) { }
+	vec2(float xy = 0) : x(xy), y(xy) { }
+	vec2(float x_, float y_) : x(x_), y(y_) { }
 };
 
-inline Vector2 operator+(const Vector2& lhs, const Vector2& rhs) { return Vector2(lhs.x + rhs.x, lhs.y + rhs.y); }
-inline Vector2 operator-(const Vector2& lhs, const Vector2& rhs) { return Vector2(lhs.x - rhs.x, lhs.y - rhs.y); }
-inline Vector2 operator*(const Vector2& lhs, const Vector2& rhs) { return Vector2(lhs.x * rhs.x, lhs.y * rhs.y); }
-inline Vector2 operator/(const Vector2& lhs, const Vector2& rhs) { return Vector2(lhs.x / rhs.x, lhs.y / rhs.y); }
+struct vec4
+{
+	float x, y, z, w;
 
-inline Vector2 operator-(const Vector2& rhs) { return Vector2(-rhs.x, -rhs.y); }
+	vec4(float xyzw = 0) : x(xyzw), y(xyzw), z(xyzw), w(xyzw) { }
+	vec4(float x_, float y_, float z_, float w_) : x(x_), y(y_), z(z_), w(w_) { }
+	vec4(vec2 xy, float z_, float w_) : x(xy.x), y(xy.y), z(z_), w(w_) { }
+	vec4(vec2 xy, vec2 zw) : x(xy.x), y(xy.y), z(zw.x), w(zw.y) { }
+};
 
-inline Vector2& operator+=(Vector2& lhs, const Vector2& rhs) { lhs.x += rhs.x; lhs.y += rhs.y; return lhs; }
-inline Vector2& operator-=(Vector2& lhs, const Vector2& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
-inline Vector2& operator*=(Vector2& lhs, const Vector2& rhs) { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
-inline Vector2& operator/=(Vector2& lhs, const Vector2& rhs) { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
+inline vec2 operator+(const vec2& lhs, const vec2& rhs) { return vec2(lhs.x + rhs.x, lhs.y + rhs.y); }
+inline vec2 operator-(const vec2& lhs, const vec2& rhs) { return vec2(lhs.x - rhs.x, lhs.y - rhs.y); }
+inline vec2 operator*(const vec2& lhs, const vec2& rhs) { return vec2(lhs.x * rhs.x, lhs.y * rhs.y); }
+inline vec2 operator/(const vec2& lhs, const vec2& rhs) { return vec2(lhs.x / rhs.x, lhs.y / rhs.y); }
 
-inline Vector2 Rotation(float a) { return Vector2(cosf(a), sinf(a)); }
+inline vec2 operator-(const vec2& rhs) { return vec2(-rhs.x, -rhs.y); }
 
-struct Colour
+inline vec2& operator+=(vec2& lhs, const vec2& rhs) { lhs.x += rhs.x; lhs.y += rhs.y; return lhs; }
+inline vec2& operator-=(vec2& lhs, const vec2& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
+inline vec2& operator*=(vec2& lhs, const vec2& rhs) { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
+inline vec2& operator/=(vec2& lhs, const vec2& rhs) { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
+
+inline vec2 Rotation(float a) { return vec2(cosf(a), sinf(a)); }
+
+struct colour
 {
 	float r, g, b, a;
 
-	Colour(float rgba = 1) : r(rgba), g(rgba), b(rgba), a(rgba) { }
-	Colour(float rgb, float a) : r(rgb), g(rgb), b(rgb), a(a) { }
-	Colour(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) { }
+	colour(float rgba = 1) : r(rgba), g(rgba), b(rgba), a(rgba) { }
+	colour(float rgb, float a) : r(rgb), g(rgb), b(rgb), a(a) { }
+	colour(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) { }
 };
 
-inline Colour operator+(const Colour& lhs, const Colour& rhs) { return Colour(lhs.r + rhs.r, lhs.g + rhs.g, lhs.b + rhs.b, lhs.a + rhs.a); }
-inline Colour operator-(const Colour& lhs, const Colour& rhs) { return Colour(lhs.r - rhs.r, lhs.g - rhs.g, lhs.b - rhs.b, lhs.a - rhs.a); }
-inline Colour operator*(const Colour& lhs, const Colour& rhs) { return Colour(lhs.r * rhs.r, lhs.g * rhs.g, lhs.b * rhs.b, lhs.a * rhs.a); }
-inline Colour operator/(const Colour& lhs, const Colour& rhs) { return Colour(lhs.r / rhs.r, lhs.g / rhs.g, lhs.b / rhs.b, lhs.a / rhs.a); }
+inline colour operator+(const colour& lhs, const colour& rhs) { return colour(lhs.r + rhs.r, lhs.g + rhs.g, lhs.b + rhs.b, lhs.a + rhs.a); }
+inline colour operator-(const colour& lhs, const colour& rhs) { return colour(lhs.r - rhs.r, lhs.g - rhs.g, lhs.b - rhs.b, lhs.a - rhs.a); }
+inline colour operator*(const colour& lhs, const colour& rhs) { return colour(lhs.r * rhs.r, lhs.g * rhs.g, lhs.b * rhs.b, lhs.a * rhs.a); }
+inline colour operator/(const colour& lhs, const colour& rhs) { return colour(lhs.r / rhs.r, lhs.g / rhs.g, lhs.b / rhs.b, lhs.a / rhs.a); }
+
+inline float FRand(float mag) { return ((float)rand() / (float)RAND_MAX) * mag; }
+inline float SignedFRand(float mag) { return FRand(2.0f * mag) - mag; }
+inline vec2 RandBox(float magX, float magY) { return vec2(SignedFRand(magX), SignedFRand(magY)); }
+
+inline bool OverlapsRect(vec2 c0, vec2 s0, vec2 c1, vec2 s1)
+{
+	vec2 delta = c1 - c0;
+	vec2 size = (s0 + s1) * 0.5f;
+	
+	return (fabsf(delta.x) < size.x) && (fabsf(delta.y) < size.y);
+}
 
 extern bool gHasFocus;
 extern bool gKeyUp;
@@ -65,6 +85,9 @@ void Panic(const char* msg);
 
 // Gpu
 
+extern int kWinWidth;
+extern int kWinHeight;
+
 namespace gpu
 {
 
@@ -77,15 +100,17 @@ namespace gpu
 	void* Map(VertexBuffer* vb);
 	void Unmap(VertexBuffer* vb);
 
-	ShaderDecl* CreateShaderDecl(void* vertexShader, int vertexShaderLength, void* pixelShader, int pixelShaderLength);
+	ShaderDecl* CreateShaderDecl(const BYTE* vertexShader, int vertexShaderLength, const BYTE* pixelShader, int pixelShaderLength);
 	void DestroyShaderDecl(ShaderDecl* decl);
 
-	Texture2d* LoadTexture2d(const char* path);
+	Texture2d* CreateTexture2d(int width, int height);
 	void DestroyTexture2d(Texture2d* tex);
 	void SetTexture(Texture2d* tex);
 
 	void Init();
-	void Clear(const Colour& colour);
+	void Clear(uint32_t col);
+	void SetPsConst(int slot, vec4 v);
+	void SetVsConst(int slot, vec4 v);
 	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count);
 
 }
@@ -94,21 +119,13 @@ namespace gpu
 
 struct Vertex
 {
-	Vector2 pos;
-	Vector2 uv;
-	Colour colour;
+	float x, y;
+	float u, v;
+	float r, g, b, a;
 };
 
-enum { kFlipX = 1, kFlipY = 2 };
-
-void DrawRect(Vector2 p0, Vector2 p1, int sprite, int flags, Colour colour);
-void DrawSprite(Vector2 pos, Vector2 scale, int sprite, int flags, Colour colour);
-
-enum { kTextLeft = 1, kTextCentre = 2, kTextRight = 3 };
-
-void DrawCharRect(Vector2 p0, Vector2 p1, int sprite, int flags, Colour colour);
-void DrawChar(Vector2 pos, Vector2 scale, int sprite, int flags, Colour colour);
-void DrawString(Vector2 pos, int flags, Colour colour, const char* txt, ...);
+void SetCamera(vec2 centre, float width);
+void DrawRect(vec2 p0, vec2 p1, colour c);
 
 // Sound
 

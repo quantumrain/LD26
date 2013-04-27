@@ -1,5 +1,3 @@
-row_major float4x4 worldViewProj;
-
 struct VS_INPUT
 {
 	float2 position	: POSITION;
@@ -14,12 +12,13 @@ struct VS_OUTPUT
 	float4 colour	: COLOR0;
 };
 
+float4 cam : register(c0);
+
 VS_OUTPUT main(VS_INPUT v)
 {
 	VS_OUTPUT output;
 
-	//output.position	= mul(float4(v.position.x, 0.0f, v.position.y, 1.0f), worldViewProj);
-	output.position	= float4(v.position, 0.0f, 1.0f);
+	output.position	= float4((v.position + cam.xy) * cam.zw, 0.0f, 1.0f);
 	output.uv		= v.uv;
 	output.colour	= v.colour;
 

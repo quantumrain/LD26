@@ -1,11 +1,9 @@
-// Copyright 2012 Stephen Cakebread
-
 #include "Pch.h"
 #include "Common.h"
 #include "resource.h"
 
-int kWinWidth	= 288;
-int kWinHeight	= 160;
+int kWinWidth	= 1152;
+int kWinHeight	= 640;
 
 bool gHasFocus;
 bool gKeyUp;
@@ -32,7 +30,7 @@ HWND gMainWnd;
 
 void Panic(const char* msg)
 {
-	MessageBoxA(gMainWnd, msg, "LD24 - Super Conga Kat", MB_ICONERROR | MB_OK);
+	MessageBoxA(gMainWnd, msg, "LD26 - ???", MB_ICONERROR | MB_OK);
 	ExitProcess(0);
 }
 
@@ -42,6 +40,11 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		case WM_ACTIVATE:
 			gHasFocus = wparam != WA_INACTIVE;
+		break;
+
+		case WM_CHAR:
+			if (LOWORD(wparam) == 27)
+				PostQuitMessage(0);
 		break;
 
 		case WM_SYSKEYDOWN:
@@ -77,12 +80,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	DWORD	style	= WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
 	DWORD	styleEx = WS_EX_WINDOWEDGE;
-	RECT	rcWin	= { 0, 0, kWinWidth * 4, kWinHeight * 4 };
+	RECT	rcWin	= { 0, 0, kWinWidth, kWinHeight };
 
 	AdjustWindowRectEx(&rcWin, style, FALSE, styleEx);
 	OffsetRect(&rcWin, 100, 100);
 
-	gMainWnd = CreateWindowEx(styleEx, wc.lpszClassName, L"LD24 - Super Conga Kat", style, rcWin.left, rcWin.top, rcWin.right - rcWin.left, rcWin.bottom - rcWin.top, 0, 0, 0, 0);
+	gMainWnd = CreateWindowEx(styleEx, wc.lpszClassName, L"LD26 - ????", style, rcWin.left, rcWin.top, rcWin.right - rcWin.left, rcWin.bottom - rcWin.top, 0, 0, 0, 0);
 
 	ShowWindow(gMainWnd, SW_SHOWNORMAL);
 

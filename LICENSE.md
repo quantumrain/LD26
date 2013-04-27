@@ -1,1 +1,1 @@
-Copyright 2012 Stephen Cakebread <https://github.com/quantumrain/LD24>
+Copyright 2013 Stephen Cakebread <https://github.com/quantumrain/LD26>
