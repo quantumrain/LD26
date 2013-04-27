@@ -45,64 +45,68 @@ int next_oldest_block(worm* w, int min_age) {
 	return best;
 }
 
-bool is_player_valid(map* m, player_state* ps) {
+bool is_worm_split(map* m, player_state* ps, worm* w) {
+	if (w->num_blocks <= 1)
+		return false;
+
+	int touched[MAX_WORM_BLOCKS] = { };
+
+	int num_touched = 1;
+	touched[w->active_block] = 1;
+
+	for(;;) {
+		int touched_this_pass = 0;
+
+		for(int j = 0; j < w->num_blocks; j++) {
+			if (touched[j] == 1) {
+				worm_block* b = w->blocks + j;
+
+				int u = block_at(w, b->pos + ivec2(0, -1));
+				int d = block_at(w, b->pos + ivec2(0, 1));
+				int l = block_at(w, b->pos + ivec2(-1, 0));
+				int r = block_at(w, b->pos + ivec2(1, 0));
+
+				if (u >= 0 && !touched[u]) { touched[u] = 1; num_touched++; touched_this_pass++; }
+				if (d >= 0 && !touched[d]) { touched[d] = 1; num_touched++; touched_this_pass++; }
+				if (l >= 0 && !touched[l]) { touched[l] = 1; num_touched++; touched_this_pass++; }
+				if (r >= 0 && !touched[r]) { touched[r] = 1; num_touched++; touched_this_pass++; }
+
+				touched[j] = 2;
+			}
+		}
+
+		if (num_touched == w->num_blocks)
+			break;
+
+		if (touched_this_pass == 0)
+			return true;
+	}
+
+	return false;
+}
+
+int anchor_block(map* m, player_state* ps, worm* w) {
+	for(int j = 0; j < w->num_blocks; j++) {
+		worm_block* b = w->blocks + j;
+
+		ivec2 anchor_pos = b->pos + ivec2(0, 1);
+
+		if (block_at(w, anchor_pos) >= 0)
+			continue;
+
+		if (!is_open_tile(m, ps, anchor_pos))
+			return j;
+	}
+
+	return -1;
+}
+
+bool all_worms_anchored(map* m, player_state* ps) {
 	for(int i = 0; i < ps->num_worms; i++) {
 		worm* w = ps->worms + i;
 
-		// worm has an anchor to the ground
-
-		bool has_anchor = false;
-
-		for(int j = 0; j < w->num_blocks; j++) {
-			worm_block* b = w->blocks + j;
-
-			ivec2 anchor_pos = b->pos + ivec2(0, 1);
-
-			if (block_at(w, anchor_pos) >= 0)
-				continue;
-
-			if (!is_open_tile(m, ps, anchor_pos))
-				has_anchor = true;
-		}
-
-		if (!has_anchor)
+		if (anchor_block(m, ps, w) < 0)
 			return false;
-
-		// worm hasn't been split
-
-		if (w->num_blocks > 1) {
-			int touched[MAX_WORM_BLOCKS] = { };
-
-			bool has_updated = true;
-			int num_touched = 1;
-			touched[w->active_block] = 1;
-
-			for(;; has_updated = false) {
-				for(int j = 0; j < w->num_blocks; j++) {
-					if (touched[j] == 1) {
-						worm_block* b = w->blocks + j;
-
-						int u = block_at(w, b->pos + ivec2(0, -1));
-						int d = block_at(w, b->pos + ivec2(0, 1));
-						int l = block_at(w, b->pos + ivec2(-1, 0));
-						int r = block_at(w, b->pos + ivec2(1, 0));
-
-						if (u >= 0 && !touched[u]) { has_updated |= true; touched[u] = 1; num_touched++; }
-						if (d >= 0 && !touched[d]) { has_updated |= true; touched[d] = 1; num_touched++; }
-						if (l >= 0 && !touched[l]) { has_updated |= true; touched[l] = 1; num_touched++; }
-						if (r >= 0 && !touched[r]) { has_updated |= true; touched[r] = 1; num_touched++; }
-
-						touched[j] = 2;
-					}
-				}
-
-				if (num_touched == w->num_blocks)
-					break;
-
-				if (!has_updated)
-					return false;
-			}
-		}
 	}
 
 	return true;

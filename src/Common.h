@@ -171,6 +171,7 @@ struct Vertex
 
 void set_camera(vec2 centre, float width);
 void draw_rect(vec2 p0, vec2 p1, colour c);
+void draw_rect(vec2 p0, vec2 p1, colour c0, colour c1, colour c2, colour c3);
 
 // Sound
 

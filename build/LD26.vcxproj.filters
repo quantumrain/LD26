@@ -64,6 +64,9 @@
     <ClCompile Include="..\src\PlayerState.cpp">
       <Filter>game</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Effects.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\data\map0.txt">

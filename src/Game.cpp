@@ -76,6 +76,11 @@ void move_worm(map* m, player_state* ps, ivec2 dir) {
 
 		if (candidate < 0) {
 			SoundPlay(kSid_Buzz, 0.75f, 0.25f); // TODO: No candidates effect
+			int anchor = anchor_block(m, ps, w);
+
+			if (anchor >= 0)
+				effect_anchor_flash(w->blocks[anchor].pos);
+
 			return;
 		}
 
@@ -88,9 +93,11 @@ void move_worm(map* m, player_state* ps, ivec2 dir) {
 		b->pos = target_pos;
 		b->age = ++w->age;
 
-		if (is_player_valid(m, ps)) {
-			SoundPlay(kSid_Dit, 1.5f, 0.25f); // TODO: Success effect
-			break;
+		if (!is_worm_split(m, ps, w)) {
+			if (all_worms_anchored(m, ps)) {
+				SoundPlay(kSid_Dit, 1.5f, 0.25f); // TODO: Success effect
+				break;
+			}
 		}
 
 		*ps = old_ps;
@@ -176,9 +183,10 @@ void GameInit() {
 
 void GameUpdate() {
 	update_game(&g_map, &g_ps);
+	update_effects();
 
 	vec2 size(to_vec2(g_map.br - g_map.tl));
-	vec2 centre(to_vec2(g_map.br + g_map.tl) * vec2(0.5f, -0.5f));
+	vec2 centre(to_vec2(g_map.br + g_map.tl) * vec2(0.5f, 0.5f));
 
 	vec2 cam_pos = centre;
 	float width = 10.0f;
@@ -194,6 +202,6 @@ void GameUpdate() {
 	}
 
 	set_camera(cam_pos, width);
-
-	render_map(&g_map, &g_ps, vec2(1.0f, -1.0f));
+	render_map(&g_map, &g_ps);
+	render_effects();
 }

@@ -58,11 +58,17 @@ struct player_state {
 
 vec2 to_screen(ivec2 v);
 bool load_map(map* m, player_state* gs, const char* path);
-void render_map(map* m, player_state* gs, vec2 scale);
+void render_map(map* m, player_state* gs);
 
 int block_at(worm* w, ivec2 pos);
 bool is_open_tile(map* m, player_state* gs, ivec2 pos);
 int next_oldest_block(worm* w, int min_age);
-bool is_player_valid(map* m, player_state* gs);
+bool is_worm_split(map* m, player_state* ps, worm* w);
+int anchor_block(map* m, player_state* ps, worm* w);
+bool all_worms_anchored(map* m, player_state* gs);
+
+void effect_anchor_flash(ivec2 pos);
+void update_effects();
+void render_effects();
 
 #endif // GAME_H

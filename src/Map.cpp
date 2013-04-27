@@ -140,7 +140,7 @@ bool load_map(map* m, player_state* gs, const char* path) {
 	return true;
 }
 
-void render_map(map* m, player_state* gs, vec2 scale) {
+void render_map(map* m, player_state* gs) {
 	ivec2 size = m->size;
 
 	for(int y = 0; y < size.y; y++) {
@@ -154,7 +154,7 @@ void render_map(map* m, player_state* gs, vec2 scale) {
 				case TILE_EMPTY: c = colour(0.25f, 1.0f); break;
 			}
 
-			draw_rect(p0 * scale, p1 * scale, c);
+			draw_rect(p0, p1, c);
 		}
 	}
 
@@ -171,7 +171,7 @@ void render_map(map* m, player_state* gs, vec2 scale) {
 			vec2 p0(to_vec2(ivec2(b->pos)));
 			vec2 p1(p0 + vec2(1.0f));
 
-			draw_rect(p0 * scale, p1 * scale, m->colours[i] * fade);
+			draw_rect(p0, p1, m->colours[i] * fade);
 		}
 
 		// active block
@@ -183,7 +183,7 @@ void render_map(map* m, player_state* gs, vec2 scale) {
 			vec2 p1(p0 + vec2(0.5f));
 			colour col = (gs->active_worm == i) ? colour(0.0f, 0.5f) : colour(0.0f, 0.1f);
 
-			draw_rect(p0 * scale, p1 * scale, col);
+			draw_rect(p0, p1, col);
 		}
 
 		// target
@@ -192,7 +192,7 @@ void render_map(map* m, player_state* gs, vec2 scale) {
 			vec2 p0(to_vec2(ivec2(m->targets[i])) + vec2(0.1f));
 			vec2 p1(p0 + vec2(0.8f));
 
-			draw_rect(p0 * scale, p1 * scale, m->colours[i] * colour(1.0f, 0.65f));
+			draw_rect(p0, p1, m->colours[i] * colour(1.0f, 0.65f));
 		}
 	}
 }
