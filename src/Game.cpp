@@ -70,16 +70,20 @@ void move_worm(map* m, player_state* ps, ivec2 dir) {
 	}
 
 	int age = 0;
+	
+	const int MAX_BAD_ANCHORS = MAX_WORMS * 2;
+	ivec2 bad_anchors[MAX_BAD_ANCHORS];
+	colour bad_anchor_colours[MAX_BAD_ANCHORS];
+	int num_bad_anchors = 0;
 
 	for(;;) {
 		int candidate = next_oldest_block(w, age);
 
 		if (candidate < 0) {
 			SoundPlay(kSid_Buzz, 0.75f, 0.25f); // TODO: No candidates effect
-			int anchor = anchor_block(m, ps, w);
 
-			if (anchor >= 0)
-				effect_anchor_flash(w->blocks[anchor].pos);
+			for(int i = 0; i < num_bad_anchors; i++)
+				effect_anchor_flash(bad_anchors[i], bad_anchor_colours[i]);
 
 			return;
 		}
@@ -98,6 +102,25 @@ void move_worm(map* m, player_state* ps, ivec2 dir) {
 				SoundPlay(kSid_Dit, 1.5f, 0.25f); // TODO: Success effect
 				break;
 			}
+
+			for(int i = 0; i < ps->num_worms; i++) {
+				worm* w = ps->worms + i;
+
+				if (anchor_block(m, ps, w) >= 0)
+					continue;
+
+				if (num_bad_anchors < MAX_BAD_ANCHORS) {
+					worm* old_w = old_ps.worms + i;
+					int anchor = anchor_block(m, &old_ps, old_w);
+
+					if (anchor >= 0) {
+						bad_anchors[num_bad_anchors] = old_w->blocks[anchor].pos;
+						bad_anchor_colours[num_bad_anchors] = m->colours[i];
+						num_bad_anchors++;
+					}
+				}
+			}
+
 		}
 
 		*ps = old_ps;

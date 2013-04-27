@@ -67,7 +67,7 @@ bool is_worm_split(map* m, player_state* ps, worm* w);
 int anchor_block(map* m, player_state* ps, worm* w);
 bool all_worms_anchored(map* m, player_state* gs);
 
-void effect_anchor_flash(ivec2 pos);
+void effect_anchor_flash(ivec2 pos, colour col);
 void update_effects();
 void render_effects();
 

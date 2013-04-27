@@ -163,7 +163,7 @@ void render_map(map* m, player_state* gs) {
 
 		// blocks
 
-		colour fade = (i == gs->active_worm) ? colour(1.1f, 1.0f) : colour(0.8f, 1.0f);
+		colour fade = (i == gs->active_worm) ? colour(1.1f, 1.0f) : colour(0.65f, 1.0f);
 
 		for(int j = 0; j < w->num_blocks; j++) {
 			worm_block* b = w->blocks + j;
@@ -181,7 +181,7 @@ void render_map(map* m, player_state* gs) {
 
 			vec2 p0(to_vec2(ivec2(b->pos)) + vec2(0.25f));
 			vec2 p1(p0 + vec2(0.5f));
-			colour col = (gs->active_worm == i) ? colour(0.0f, 0.5f) : colour(0.0f, 0.1f);
+			colour col = (gs->active_worm == i) ? colour(0.0f, 0.5f) : colour(0.0f, 0.075f);
 
 			draw_rect(p0, p1, col);
 		}

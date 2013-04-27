@@ -12,6 +12,7 @@ struct effect {
 	float time;
 	float lifetime;
 	ivec2 pos;
+	colour col;
 
 	effect() : type(EFFECT_NONE), time(), lifetime() { }
 };
@@ -20,7 +21,7 @@ const int MAX_EFFECTS = 32;
 effect g_effects[MAX_EFFECTS];
 int g_num_effects;
 
-void effect_anchor_flash(ivec2 pos) {
+void effect_anchor_flash(ivec2 pos, colour col) {
 	if (g_num_effects >= MAX_EFFECTS)
 		return;
 
@@ -30,6 +31,7 @@ void effect_anchor_flash(ivec2 pos) {
 	e->time = 0.0f;
 	e->lifetime = 0.25f;
 	e->pos = pos + ivec2(0, 1);
+	e->col = col;
 }
 
 void update_effects() {
@@ -53,11 +55,14 @@ void render_effects() {
 			case EFFECT_ANCHOR_FLASH: {
 				vec2 pos = to_vec2(e->pos);
 
-				colour c0(0.0f);
-				colour c1(1.0f - Square(f));
+				float inv_f = 1.0f - Square(f);
 
-				draw_rect(pos - vec2(0.0f, 0.2f), pos + vec2(1.0f, 0.0f), c0, c0, c1, c1);
-				draw_rect(pos + vec2(0.0f, 0.0f), pos + vec2(1.0f, 0.2f), c1, c1, c0, c0);
+				colour c0(0.0f);
+				colour c1(e->col.r * inv_f, e->col.g * inv_f, e->col.b * inv_f, 0.0f);
+				colour c2(e->col * inv_f);
+
+				draw_rect(pos - vec2(0.0f, 0.25f), pos + vec2(1.0f, 0.0f), c0, c0, c1, c1);
+				draw_rect(pos + vec2(0.0f, 0.0f), pos + vec2(1.0f, 0.1f), c2, c2, c0, c0);
 			}
 			break;
 		}
