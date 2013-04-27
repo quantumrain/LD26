@@ -19,9 +19,8 @@ void update_game(map* m, game_state* gs) {
 		}
 	}
 
-	if (gKey == KEY_FIRE) {
-		gs->active_worm = (gs->active_worm + 1) % gs->num_worms;
-	}
+	if (gKey == KEY_FIRE) gs->active_worm = (gs->active_worm + 1) % gs->num_worms;
+	if (gKey == KEY_ALT_FIRE) gs->active_worm = (gs->active_worm + gs->num_worms - 1) % gs->num_worms;
 
 	if (gKey == KEY_LEFT) move_worm(m, gs, -1, 0);
 	if (gKey == KEY_RIGHT) move_worm(m, gs, 1, 0);

@@ -80,6 +80,7 @@ enum key_press {
 	KEY_LEFT,
 	KEY_RIGHT,
 	KEY_FIRE,
+	KEY_ALT_FIRE,
 	KEY_1,
 	KEY_2,
 	KEY_3,

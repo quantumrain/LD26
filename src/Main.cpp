@@ -46,7 +46,13 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 				case VK_DOWN:	got_key = KEY_DOWN; break;
 				case VK_LEFT:	got_key = KEY_LEFT; break;
 				case VK_RIGHT:	got_key = KEY_RIGHT; break;
-				case ' ':		got_key = KEY_FIRE; break;
+
+				case ' ':
+				case VK_TAB:
+				case VK_RETURN:
+					got_key = (GetKeyState(VK_SHIFT) & 0x8000) ? KEY_ALT_FIRE : KEY_FIRE;
+				break;
+
 				case '0':		got_key = KEY_0; break;
 				case '1':		got_key = KEY_1; break;
 				case '2':		got_key = KEY_2; break;
