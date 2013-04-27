@@ -1,0 +1,1 @@
+Copyright 2012 Stephen Cakebread <https://github.com/quantumrain/LD24>

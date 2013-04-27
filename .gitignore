@@ -1,0 +1,37 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# VS stuff
+*.sdf
+*.opensdf
+*.ipch
+*.tlog
+*.manifest
+*.res
+*.obj
+*.pch
+*.rc
+*.log
+*.lastbuildstate
+*.exe
+*.ilk
+*.pdb
+*.idb
+*.cache
+*.idb
+*.suo
+obj
+
+# Code stuff
+ShaderPsh.h
+ShaderVSh.h

@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="src\Common.h" />
+    <ClInclude Include="src\Pch.h" />
+    <ClInclude Include="src\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Pch.cpp" />
+    <ClCompile Include="src\Sound.cpp" />
+    <ClCompile Include="src\Render.cpp" />
+    <ClCompile Include="src\Gpu.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="src\ShaderPsh.hlsl" />
+    <CustomBuild Include="src\ShaderVsh.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\ld24.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\ld24.rc" />
+  </ItemGroup>
+</Project>
