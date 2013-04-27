@@ -8,6 +8,9 @@
     <Filter Include="shaders">
       <UniqueIdentifier>{2548b999-52e2-47c3-8915-1abc4c3fb4fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="maps">
+      <UniqueIdentifier>{59f1e57f-ea75-4814-90f8-aa6e0702f45b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\shaders\quad_ps.hlsl">
@@ -25,6 +28,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\src\resource.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Game.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,5 +53,16 @@
     <ClCompile Include="..\src\Sound.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Common.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Map.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\data\map0.txt">
+      <Filter>maps</Filter>
+    </Text>
   </ItemGroup>
 </Project>

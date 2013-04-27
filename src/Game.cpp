@@ -1,20 +1,16 @@
 #include "Pch.h"
 #include "Common.h"
+#include "Game.h"
 
-void GameInit()
-{
+game_state g_gs;
+map g_map;
+
+void GameInit() {
+	load_map(&g_map, "data\\map0.txt");
 }
 
-void GameUpdate()
-{
-	static vec2 p(2, 2);
-	static float w = 4.0f;
+void GameUpdate() {
+	set_camera(vec2(g_map.size.x * 0.5f, g_map.size.y * -0.5f), 10.0f);
 
-	p.x += (gKeyRight - gKeyLeft) * 0.1f;
-	p.y += (gKeyUp - gKeyDown) * 0.1f;
-	w += gKeyFire * 0.1f;
-
-	SetCamera(p, w);
-
-	DrawRect(vec2(1, 1), vec2(3, 3), colour(1, 1, 1, 1));
+	render_map(&g_map, vec2(1.0f));
 }

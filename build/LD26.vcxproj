@@ -106,19 +106,25 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Common.h" />
+    <ClInclude Include="..\src\Game.h" />
     <ClInclude Include="..\src\Pch.h" />
     <ClInclude Include="..\src\resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\Common.cpp" />
     <ClCompile Include="..\src\Game.cpp" />
     <ClCompile Include="..\src\Gpu.cpp" />
     <ClCompile Include="..\src\Main.cpp" />
+    <ClCompile Include="..\src\Map.cpp" />
     <ClCompile Include="..\src\Pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\src\Render.cpp" />
     <ClCompile Include="..\src\Sound.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\data\map0.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

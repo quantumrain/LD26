@@ -78,7 +78,7 @@ extern bool gKeyLeft;
 extern bool gKeyRight;
 extern bool gKeyFire;
 
-// Main
+// Debug
 
 void DebugLn(const char* txt, ...);
 void Panic(const char* msg);
@@ -124,8 +124,8 @@ struct Vertex
 	float r, g, b, a;
 };
 
-void SetCamera(vec2 centre, float width);
-void DrawRect(vec2 p0, vec2 p1, colour c);
+void set_camera(vec2 centre, float width);
+void draw_rect(vec2 p0, vec2 p1, colour c);
 
 // Sound
 
@@ -145,5 +145,19 @@ enum SoundId
 void SoundInit();
 void SoundShutdown();
 void SoundPlay(SoundId sid, float freq, float volume);
+
+// File
+
+struct file_buf {
+	uint8_t* data;
+	int size;
+
+	file_buf() : data(), size() { }
+	~file_buf() { destroy(); }
+
+	void destroy() { delete [] data; data = 0; size = 0; }
+};
+
+bool load_file(file_buf* fb, const char* path);
 
 #endif // COMMON_H

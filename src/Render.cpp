@@ -12,13 +12,13 @@ Vertex gRectVerts[kMaxRectVerts];
 int gRectVertCount;
 vec4 gCam;
 
-void SetCamera(vec2 centre, float width)
+void set_camera(vec2 centre, float width)
 {
 	float ratio = kWinHeight / (float)kWinWidth;
 	gCam = vec4(-centre, 1.0f / vec2(width, width * ratio));
 }
 
-void DrawRect(vec2 p0, vec2 p1, colour colour)
+void draw_rect(vec2 p0, vec2 p1, colour colour)
 {
 	if ((gRectVertCount + 6) > kMaxRectVerts)
 	{
