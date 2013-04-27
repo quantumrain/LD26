@@ -159,13 +159,15 @@ void render_map(map* m, game_state* gs, vec2 scale) {
 
 		// blocks
 
+		colour fade = (i == gs->active_worm) ? colour(1.1f, 1.0f) : colour(0.8f, 1.0f);
+
 		for(int j = 0; j < w->num_blocks; j++) {
 			worm_block* b = w->blocks + j;
 
 			vec2 p0(to_screen(b->pos));
 			vec2 p1(p0 + vec2(1.0f));
 
-			draw_rect(p0 * scale, p1 * scale, m->colours[i]);
+			draw_rect(p0 * scale, p1 * scale, m->colours[i] * fade);
 		}
 
 		// active block
