@@ -51,7 +51,7 @@ void set_map(map* m, game_state* gs, int x, int y, uint8_t c) {
 				worm_block* b = &w->blocks[w->num_blocks++];
 
 				b->pos = ivec2(x, y);
-				b->age = w->age++;
+				b->age = ++w->age;
 			}
 		}
 
@@ -183,10 +183,10 @@ void render_map(map* m, game_state* gs, vec2 scale) {
 		// target
 
 		{
-			vec2 p0(to_screen(m->targets[i]) + vec2(0.05f));
-			vec2 p1(p0 + vec2(0.9f));
+			vec2 p0(to_screen(m->targets[i]) + vec2(0.1f));
+			vec2 p1(p0 + vec2(0.8f));
 
-			draw_rect(p0 * scale, p1 * scale, m->colours[i]);
+			draw_rect(p0 * scale, p1 * scale, m->colours[i] * colour(1.0f, 0.65f));
 		}
 	}
 }

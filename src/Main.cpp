@@ -26,7 +26,7 @@ HWND gMainWnd;
 
 void Panic(const char* msg)
 {
-	MessageBoxA(gMainWnd, msg, "LD26 - ???", MB_ICONERROR | MB_OK);
+	MessageBoxA(gMainWnd, msg, "LD26 - Gravity Worm", MB_ICONERROR | MB_OK);
 	ExitProcess(0);
 }
 
@@ -127,7 +127,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	AdjustWindowRectEx(&rcWin, style, FALSE, styleEx);
 	OffsetRect(&rcWin, 100, 100);
 
-	gMainWnd = CreateWindowEx(styleEx, wc.lpszClassName, L"LD26 - ????", style, rcWin.left, rcWin.top, rcWin.right - rcWin.left, rcWin.bottom - rcWin.top, 0, 0, 0, 0);
+	gMainWnd = CreateWindowEx(styleEx, wc.lpszClassName, L"LD26 - Gravity Worm", style, rcWin.left, rcWin.top, rcWin.right - rcWin.left, rcWin.bottom - rcWin.top, 0, 0, 0, 0);
 
 	ShowWindow(gMainWnd, SW_SHOWNORMAL);
 

@@ -25,7 +25,31 @@ bool is_open_tile(map* m, game_state* gs, ivec2 pos) {
 	if (m->at(pos.x, pos.y) != TILE_EMPTY)
 		return false;
 
+	for(int i = 0; i < gs->num_worms; i++) {
+		if (block_at(gs->worms + i, pos) >= 0)
+			return false;
+	}
+
 	return true;
+}
+
+int next_oldest_block(worm* w, int age) {
+	int best = -1;
+	int best_age = 0;
+
+	for(int i = 0; i < w->num_blocks; i++) {
+		worm_block* b = w->blocks + i;
+
+		if (b->age <= age)
+			continue;
+
+		if (best < 0 || b->age < best_age) {
+			best = i;
+			best_age = b->age;
+		}
+	}
+
+	return best;
 }
 
 void move_worm(map* m, game_state* gs, ivec2 dir) {
@@ -42,11 +66,29 @@ void move_worm(map* m, game_state* gs, ivec2 dir) {
 	}
 
 	if (!is_open_tile(m, gs, target_pos)) {
-		SoundPlay(kSid_Jump, 0.5f, 0.25f);
+		SoundPlay(kSid_Jump, 0.5f, 0.25f); // TODO: Blocked effect
 		return;
 	}
 
+	int age = 0;
 
+	for(;;) {
+		int candidate = next_oldest_block(w, age);
+
+		if (candidate < 0) {
+			SoundPlay(kSid_Jump, 0.5f, 0.25f); // TODO: No candidates effect
+			return;
+		}
+
+		worm_block* b = w->blocks + candidate;
+
+		//
+		b->pos = target_pos;
+		break;
+		//
+
+		age = b->age;
+	}
 }
 
 void update_game(map* m, game_state* gs) {
