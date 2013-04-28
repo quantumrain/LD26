@@ -125,6 +125,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="..\shaders\tex_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Common.h" />
@@ -135,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\Common.cpp" />
     <ClCompile Include="..\src\Effects.cpp" />
+    <ClCompile Include="..\src\Font.cpp" />
     <ClCompile Include="..\src\Game.cpp" />
     <ClCompile Include="..\src\PlayerState.cpp" />
     <ClCompile Include="..\src\Gpu.cpp" />

@@ -334,4 +334,5 @@ void GameUpdate() {
 		break;
 	}
 
+	draw_string(vec2(), vec2(0.1f), TEXT_CENTRE, colour(), "Hello");
 }

@@ -118,16 +118,28 @@ namespace gpu
 		IDirect3DTexture9* tex;
 	};
 
-	Texture2d* CreateTexture2d(int width, int height)
+	Texture2d* CreateTexture2d(int width, int height, uint8_t* initial_data)
 	{
 		Texture2d* tex = new Texture2d;
 
 		if (!tex)
 			return 0;
 
-		if (FAILED(gDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &tex->tex, 0))) {
+		if (FAILED(gDevice->CreateTexture(width, height, 1, initial_data ? 0 : D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, initial_data ? D3DPOOL_MANAGED : D3DPOOL_DEFAULT, &tex->tex, 0))) {
 			delete tex;
 			return 0;
+		}
+
+		if (initial_data) {
+			D3DLOCKED_RECT lr;
+
+			if (SUCCEEDED(tex->tex->LockRect(0, &lr, 0, D3DLOCK_DISCARD))) {
+				for(int y = 0; y < height; y++) {
+					memcpy((uint8_t*)lr.pBits + y * lr.Pitch, initial_data + y * width * 4, width * 4);
+				}
+
+				tex->tex->UnlockRect(0);
+			}
 		}
 
 		return tex;

@@ -6,8 +6,10 @@
 #include "blur_x_ps.h"
 #include "blur_y_ps.h"
 #include "combine_ps.h"
+#include "tex_ps.h"
 
 gpu::VertexBuffer* gRectVb;
+gpu::VertexBuffer* gFontVb;
 gpu::VertexBuffer* gFsQuadVb;
 gpu::ShaderDecl* gRectDecl;
 
@@ -15,10 +17,16 @@ gpu::ShaderDecl* gReduceDecl;
 gpu::ShaderDecl* gBlurXDecl;
 gpu::ShaderDecl* gBlurYDecl;
 gpu::ShaderDecl* gCombineDecl;
+gpu::ShaderDecl* gTexDecl;
 
 const int kMaxRectVerts = 64 * 1024;
 Vertex gRectVerts[kMaxRectVerts];
 int gRectVertCount;
+
+const int kMaxFontVerts = 2 * 1024;
+Vertex gFontVerts[kMaxRectVerts];
+int gFontVertCount;
+
 vec4 gCam;
 colour gTint;
 
@@ -35,7 +43,7 @@ void set_tint(colour tint) {
 	gTint = tint;
 }
 
-void draw_rect(vec2 p0, vec2 p1, colour colour) {
+void draw_rect(vec2 p0, vec2 p1, colour col) {
 	if ((gRectVertCount + 6) > kMaxRectVerts)
 	{
 		DebugLn("DrawRect overflow");
@@ -52,30 +60,30 @@ void draw_rect(vec2 p0, vec2 p1, colour colour) {
 	v->y = p0.y;
 	v->u = 0.0f;
 	v->v = 0.0f;
-	v->r = colour.r;
-	v->g = colour.g;
-	v->b = colour.b;
-	v->a = colour.a;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
 	v++;
 
 	v->x = p0.x;
 	v->y = p1.y;
 	v->u = 0.0f;
 	v->v = 0.0f;
-	v->r = colour.r;
-	v->g = colour.g;
-	v->b = colour.b;
-	v->a = colour.a;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
 	v++;
 
 	v->x = p1.x;
 	v->y = p0.y;
 	v->u = 0.0f;
 	v->v = 0.0f;
-	v->r = colour.r;
-	v->g = colour.g;
-	v->b = colour.b;
-	v->a = colour.a;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
 	v++;
 
 	// t1
@@ -84,30 +92,30 @@ void draw_rect(vec2 p0, vec2 p1, colour colour) {
 	v->y = p0.y;
 	v->u = 0.0f;
 	v->v = 0.0f;
-	v->r = colour.r;
-	v->g = colour.g;
-	v->b = colour.b;
-	v->a = colour.a;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
 	v++;
 
 	v->x = p0.x;
 	v->y = p1.y;
 	v->u = 0.0f;
 	v->v = 0.0f;
-	v->r = colour.r;
-	v->g = colour.g;
-	v->b = colour.b;
-	v->a = colour.a;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
 	v++;
 
 	v->x = p1.x;
 	v->y = p1.y;
 	v->u = 0.0f;
 	v->v = 0.0f;
-	v->r = colour.r;
-	v->g = colour.g;
-	v->b = colour.b;
-	v->a = colour.a;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
 }
 
 void draw_rect(vec2 p0, vec2 p1, colour c0, colour c1, colour c2, colour c3) {
@@ -260,6 +268,81 @@ void draw_quad(vec2 p0, vec2 p1, vec2 p2, vec2 p3, colour c0, colour c1, colour 
 	v->a = c3.a;
 }
 
+void draw_font_rect(vec2 p0, vec2 p1, vec2 uv0, vec2 uv1, colour col) {
+	if ((gFontVertCount + 6) > kMaxFontVerts)
+	{
+		DebugLn("draw_font_rect overflow");
+		return;
+	}
+
+	Vertex* v = &gFontVerts[gFontVertCount];
+
+	gFontVertCount += 6;
+
+	// t0
+
+	v->x = p0.x;
+	v->y = p0.y;
+	v->u = uv0.x;
+	v->v = uv0.y;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
+	v++;
+
+	v->x = p0.x;
+	v->y = p1.y;
+	v->u = uv0.x;
+	v->v = uv1.y;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
+	v++;
+
+	v->x = p1.x;
+	v->y = p0.y;
+	v->u = uv1.x;
+	v->v = uv0.y;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
+	v++;
+
+	// t1
+
+	v->x = p1.x;
+	v->y = p0.y;
+	v->u = uv1.x;
+	v->v = uv0.y;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
+	v++;
+
+	v->x = p0.x;
+	v->y = p1.y;
+	v->u = uv0.x;
+	v->v = uv1.y;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
+	v++;
+
+	v->x = p1.x;
+	v->y = p1.y;
+	v->u = uv1.x;
+	v->v = uv1.y;
+	v->r = col.r;
+	v->g = col.g;
+	v->b = col.b;
+	v->a = col.a;
+}
+
 struct bloom_level {
 	ivec2 size;
 	gpu::Texture2d* reduce;
@@ -283,6 +366,7 @@ struct bloom_level {
 const int MAX_BLOOM_LEVELS = 5;
 bloom_level g_bloom_levels[MAX_BLOOM_LEVELS];
 gpu::Texture2d* g_draw_target;
+gpu::Texture2d* g_font;
 
 void RenderInit()
 {
@@ -291,13 +375,15 @@ void RenderInit()
 	gBlurXDecl		= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_blur_x_ps, sizeof(g_blur_x_ps));
 	gBlurYDecl		= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_blur_y_ps, sizeof(g_blur_y_ps));
 	gCombineDecl	= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_combine_ps, sizeof(g_combine_ps));
+	gTexDecl		= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_tex_ps, sizeof(g_tex_ps));
 
 	gRectVb		= gpu::CreateVertexBuffer(sizeof(Vertex), kMaxRectVerts);
+	gFontVb		= gpu::CreateVertexBuffer(sizeof(Vertex), kMaxFontVerts);
 	gFsQuadVb	= gpu::CreateVertexBuffer(sizeof(Vertex), 3);
 
 	ivec2 size(g_WinSize);
 
-	g_draw_target = gpu::CreateTexture2d(size.x, size.y);
+	g_draw_target = gpu::CreateTexture2d(size.x, size.y, 0);
 
 	for(int i = 0; i < MAX_BLOOM_LEVELS; i++) {
 		bloom_level* bl = g_bloom_levels + i;
@@ -305,10 +391,12 @@ void RenderInit()
 		size /= 2;
 
 		bl->size = size;
-		bl->reduce = gpu::CreateTexture2d(size.x, size.y);
-		bl->blur_x = gpu::CreateTexture2d(size.x, size.y);
-		bl->blur_y = gpu::CreateTexture2d(size.x, size.y);
+		bl->reduce = gpu::CreateTexture2d(size.x, size.y, 0);
+		bl->blur_x = gpu::CreateTexture2d(size.x, size.y, 0);
+		bl->blur_y = gpu::CreateTexture2d(size.x, size.y, 0);
 	}
+
+	g_font = load_texture("data\\font.png");
 }
 
 void RenderShutdown()
@@ -318,19 +406,24 @@ void RenderShutdown()
 	gpu::DestroyShaderDecl(gBlurXDecl);
 	gpu::DestroyShaderDecl(gBlurYDecl);
 	gpu::DestroyShaderDecl(gCombineDecl);
+	gpu::DestroyShaderDecl(gTexDecl);
 
 	gpu::DestroyVertexBuffer(gRectVb);
+	gpu::DestroyVertexBuffer(gFontVb);
 	gpu::DestroyVertexBuffer(gFsQuadVb);
 
 	gpu::DestroyTexture2d(g_draw_target);
 
 	for(int i = 0; i < MAX_BLOOM_LEVELS; i++)
 		g_bloom_levels[i].destroy();
+
+	gpu::DestroyTexture2d(g_font);
 }
 
 void RenderPreUpdate()
 {
 	gRectVertCount = 0;
+	gFontVertCount = 0;
 }
 
 void do_fullscreen_quad(gpu::ShaderDecl* decl, vec2 size)
@@ -374,6 +467,12 @@ void RenderGame()
 		gpu::Unmap(gRectVb);
 	}
 
+	if (void* data = gpu::Map(gFontVb))
+	{
+		memcpy(data, gFontVerts, gFontVertCount * sizeof(Vertex));
+		gpu::Unmap(gFontVb);
+	}
+
 	// draw
 	gpu::SetRenderTarget(g_draw_target);
 	gpu::SetViewport(ivec2(0, 0), g_WinSize, vec2(0.0f, 1.0f));
@@ -381,6 +480,9 @@ void RenderGame()
 	gpu::SetVsConst(0, gCam);
 	gpu::SetPsConst(0, *(vec4*)&gTint);
 	gpu::Draw(gRectDecl, gRectVb, gRectVertCount, true, false);
+	gpu::SetTexture(0, g_font);
+	gpu::SetSampler(0, true, false);
+	gpu::Draw(gTexDecl, gFontVb, gFontVertCount, true, false);
 
 	for(int i = 0; i < MAX_BLOOM_LEVELS; i++) {
 		bloom_level* bl = g_bloom_levels + i;

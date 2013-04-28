@@ -166,7 +166,7 @@ namespace gpu
 	ShaderDecl* CreateShaderDecl(const BYTE* vertexShader, int vertexShaderLength, const BYTE* pixelShader, int pixelShaderLength);
 	void DestroyShaderDecl(ShaderDecl* decl);
 
-	Texture2d* CreateTexture2d(int width, int height);
+	Texture2d* CreateTexture2d(int width, int height, uint8_t* initial_data);
 	void DestroyTexture2d(Texture2d* tex);
 	void SetSampler(int slot, bool tex_clamp, bool bilin);
 	void SetTexture(int slot, Texture2d* tex);
@@ -199,6 +199,18 @@ void set_tint(colour tint);
 void draw_rect(vec2 p0, vec2 p1, colour c);
 void draw_rect(vec2 p0, vec2 p1, colour c0, colour c1, colour c2, colour c3);
 void draw_quad(vec2 p0, vec2 p1, vec2 p2, vec2 p3, colour c0, colour c1, colour c2, colour c3);
+void draw_font_rect(vec2 p0, vec2 p1, vec2 uv0, vec2 uv1, colour col);
+
+enum font_flags {
+	TEXT_LEFT = 1,
+	TEXT_RIGHT = 2,
+	TEXT_CENTRE = 3
+};
+
+void draw_char(vec2 pos, vec2 scale, int sprite, colour col);
+float measure_char(int c);
+float measure_string(const char* txt);
+void draw_string(vec2 pos, vec2 scale, int flags, colour col, const char* txt, ...);
 
 // Sound
 
@@ -228,5 +240,6 @@ struct file_buf {
 };
 
 bool load_file(file_buf* fb, const char* path);
+gpu::Texture2d* load_texture(const char* path);
 
 #endif // COMMON_H

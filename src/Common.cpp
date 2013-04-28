@@ -1,6 +1,9 @@
 #include "Pch.h"
 #include "Common.h"
 
+#define STBI_NO_STDIO
+#include "stb_image.c"
+
 extern HWND gMainWnd;
 
 void DebugLn(const char* txt, ...)
@@ -59,4 +62,20 @@ bool load_file(file_buf* fb, const char* path) {
 	CloseHandle(h);
 
 	return fb->data != 0;
+}
+
+gpu::Texture2d* load_texture(const char* path) {
+	file_buf fb;
+
+	if (!load_file(&fb, path))
+		return 0;
+
+	int width = 0, height = 0;
+	uint8_t* data = stbi_load_from_memory(fb.data, fb.size, &width, &height, 0, 4);
+
+	gpu::Texture2d* tex = gpu::CreateTexture2d(width, height, data);
+
+	free(data);
+
+	return tex;
 }

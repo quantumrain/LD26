@@ -33,6 +33,9 @@
     <FxCompile Include="..\shaders\reduce_ps.hlsl">
       <Filter>shaders</Filter>
     </FxCompile>
+    <FxCompile Include="..\shaders\tex_ps.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Common.h">
@@ -77,6 +80,9 @@
       <Filter>game</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Gpu.cpp">
+      <Filter>sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Font.cpp">
       <Filter>sys</Filter>
     </ClCompile>
   </ItemGroup>
