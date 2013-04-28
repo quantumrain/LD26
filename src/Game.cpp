@@ -62,7 +62,7 @@ void set_active_worm(player_state* ps, map_effects* fx, int num) {
 	}
 }
 
-void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
+bool move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
 	worm* w = ps->worms + ps->active_worm;
 	worm_block* curr_block = w->blocks + w->active_block;
 	ivec2 target_pos = curr_block->pos + dir;
@@ -73,7 +73,7 @@ void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
 		SoundPlay(kSid_Dit, 2.0f, 0.25f); // TODO: Cursor effect
 		w->active_block = existing;
 		w->blocks[existing].age = ++w->age;
-		return;
+		return true;
 	}
 
 	if (!is_open_tile(m, ps, target_pos)) {
@@ -82,7 +82,7 @@ void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
 		spawn_effect(EFFECT_COLLIDE, curr_block->pos, dir, (cw >= 0) ? m->colours[cw] : colour(0.0f, 1.0f));
 		fx->pulse[ps->active_worm] = 0.2f;
 		fx->jink[ps->active_worm] = to_vec2(dir) * 0.25f;
-		return;
+		return false;
 	}
 
 	int age = 0;
@@ -106,7 +106,7 @@ void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
 
 			fx->jink[ps->active_worm] = to_vec2(dir) * 0.25f;
 
-			return;
+			return false;
 		}
 
 		worm_block* b = w->blocks + candidate;
@@ -146,6 +146,8 @@ void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
 
 		*ps = old_ps;
 	}
+
+	return true;
 }
 
 int find_next_best_worm(map* m, player_state* ps, ivec2 p, bool forward) {
@@ -202,25 +204,28 @@ void update_game_play(map* m, player_state* ps, map_effects* fx) {
 	}
 
 	if (gKey == KEY_RESET) {
-		SoundPlay(kSid_Buzz, 0.5f, 1.0f); // TODO: Reset effect
+		SoundPlay(kSid_Dit, 0.5f, 1.0f); // TODO: Reset effect
 		change_game_state(GS_RESET_LEVEL);
 	}
 
 	if (gKey == KEY_MODE) toggle_colour_bind(&g_map, &g_ps);
 
-	// Mouse control, easier to use, but flaky right now
 	/*static bool was_down;
-
 	if (gMouseButtons & 1) {
 		vec2 fp = to_game((to_vec2(gMousePos) / to_vec2(g_WinSize)) * 2.0f - 1.0f);
 		ivec2 p((int)fp.x, (int)fp.y);
 
 		static ivec2 first_pos;
 		static int first_worm;
+		static DWORD last_t;
+		static int tried_dir;
+
+		DWORD t = GetTickCount();
 
 		if (!was_down) {
 			first_pos = p;
 			was_down = true;
+			tried_dir = 0;
 
 			first_worm = worm_at(&g_ps, first_pos);
 
@@ -232,28 +237,27 @@ void update_game_play(map* m, player_state* ps, map_effects* fx) {
 		if (first_worm >= 0) {
 			worm* w = g_ps.worms + first_worm;
 			int bi = block_at(w, p);
-
 			if (bi >= 0) {
-				if (w->active_block != bi) {
-					SoundPlay(kSid_Dit, 2.0f, 0.25f);
+				if (bi != w->active_block) {
+					if ((t - last_t) > 50)
+						SoundPlay(kSid_Dit, 2.0f, 0.25f);
 					w->active_block = bi;
 					w->blocks[bi].age = ++w->age;
+					last_t = t;
+					tried_dir = 0;
 				}
-
-				first_pos = p;
 			} else {
-				if (first_pos != p) {
+				if ((t - last_t) > 50) {
 					ivec2 ap = w->blocks[w->active_block].pos;
-
 					if (p != ap) {
-						if (p.x < ap.x) move_worm(m, ps, fx, ivec2(-1, 0));
-						if (p.x > ap.x) move_worm(m, ps, fx, ivec2(1, 0));
-						if (p.y < ap.y) move_worm(m, ps, fx, ivec2(0, -1));
-						if (p.y > ap.y) move_worm(m, ps, fx, ivec2(0, 1));
+						bool moved = false;
+						if (p.x < ap.x && !moved && !(tried_dir&1)) { if (moved = move_worm(m, ps, fx, ivec2(-1, 0))) tried_dir = 0; else tried_dir |= 1; }
+						if (p.x > ap.x && !moved && !(tried_dir&2)) { if (moved = move_worm(m, ps, fx, ivec2(1, 0))) tried_dir = 0; else tried_dir |= 2; }
+						if (p.y < ap.y && !moved && !(tried_dir&4)) { if (moved = move_worm(m, ps, fx, ivec2(0, -1))) tried_dir = 0; else tried_dir |= 4; }
+						if (p.y > ap.y && !moved && !(tried_dir&8)) { if (moved = move_worm(m, ps, fx, ivec2(0, 1))) tried_dir = 0; else tried_dir |= 8; }
+						last_t = t;
 					}
 				}
-
-				first_pos = p;
 			}
 		}
 	} else {
