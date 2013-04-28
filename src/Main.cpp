@@ -15,6 +15,11 @@ DWORD gKeyDown[KEY_MAX];
 ivec2 gMousePos;
 int gMouseButtons;
 
+int g_LocKeyW;
+int g_LocKeyS;
+int g_LocKeyA;
+int g_LocKeyD;
+
 void RenderInit();
 void RenderShutdown();
 
@@ -101,6 +106,11 @@ int which_key(int c, bool shifted) {
 			#endif
 		break;
 	}
+
+	if (c == g_LocKeyW) return KEY_UP;
+	if (c == g_LocKeyS) return KEY_DOWN;
+	if (c == g_LocKeyA) return KEY_LEFT;
+	if (c == g_LocKeyD) return KEY_RIGHT;
 
 	return KEY_NONE;
 }
@@ -236,11 +246,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// Keys
 
-	int locKeyW = MapVirtualKey(0x11, MAPVK_VSC_TO_VK);
-	int locKeyS = MapVirtualKey(0x1F, MAPVK_VSC_TO_VK);
-	int locKeyA = MapVirtualKey(0x1E, MAPVK_VSC_TO_VK);
-	int locKeyD = MapVirtualKey(0x20, MAPVK_VSC_TO_VK);
-	int locKeyZ = MapVirtualKey(0x2C, MAPVK_VSC_TO_VK);
+	g_LocKeyW = MapVirtualKey(0x11, MAPVK_VSC_TO_VK);
+	g_LocKeyS = MapVirtualKey(0x1F, MAPVK_VSC_TO_VK);
+	g_LocKeyA = MapVirtualKey(0x1E, MAPVK_VSC_TO_VK);
+	g_LocKeyD = MapVirtualKey(0x20, MAPVK_VSC_TO_VK);
 
 	// Main
 
