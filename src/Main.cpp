@@ -12,6 +12,7 @@ IDirect3DDevice9* gDevice;
 
 bool gHasFocus;
 int gKey;
+bool gKeyDown[KEY_MAX];
 
 void RenderInit();
 void RenderShutdown();
@@ -64,50 +65,74 @@ void DoFrame()
 	}
 }
 
+int which_key(int c, bool shifted) {
+	switch(c) {
+		case VK_UP:		return KEY_UP;
+		case VK_DOWN:	return KEY_DOWN;
+		case VK_LEFT:	return KEY_LEFT;
+		case VK_RIGHT:	return KEY_RIGHT;
+
+		case ' ':
+		case VK_TAB:
+		case VK_RETURN:
+		return shifted ? KEY_ALT_FIRE : KEY_FIRE;
+
+		case 'R':		return KEY_RESET;
+		case VK_F1:		return KEY_CHEAT;
+
+		case '0':		return KEY_0;
+		case '1':		return KEY_1;
+		case '2':		return KEY_2;
+		case '3':		return KEY_3;
+		case '4':		return KEY_4;
+		case '5':		return KEY_5;
+		case '6':		return KEY_6;
+		case '7':		return KEY_7;
+		case '8':		return KEY_8;
+		case '9':		return KEY_9;
+
+		case 27:
+			#ifdef _DEBUG
+				PostQuitMessage(0);
+			#else
+				return KEY_RESET;
+			#endif
+		break;
+	}
+
+	return KEY_NONE;
+}
+
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch(msg)
 	{
 		case WM_ACTIVATE:
 			gHasFocus = wparam != WA_INACTIVE;
+
+			if (!gHasFocus) {
+				memset(gKeyDown, 0, sizeof(gKeyDown));
+			}
 		break;
 
 		case WM_KEYDOWN: {
-			int got_key = 0;
+			int got_key = which_key(LOWORD(wparam), (GetKeyState(VK_SHIFT) & 0x8000) != 0);
 
-			switch(LOWORD(wparam)) {
-				case VK_UP:		got_key = KEY_UP; break;
-				case VK_DOWN:	got_key = KEY_DOWN; break;
-				case VK_LEFT:	got_key = KEY_LEFT; break;
-				case VK_RIGHT:	got_key = KEY_RIGHT; break;
+			if (got_key) {
+				if (!gKeyDown[got_key])
+					gKey = got_key;
 
-				case ' ':
-				case VK_TAB:
-				case VK_RETURN:
-					got_key = (GetKeyState(VK_SHIFT) & 0x8000) ? KEY_ALT_FIRE : KEY_FIRE;
-				break;
-
-				case 'R':		got_key = KEY_RESET; break;
-				case VK_F1:		got_key = KEY_CHEAT; break;
-
-				case '0':		got_key = KEY_0; break;
-				case '1':		got_key = KEY_1; break;
-				case '2':		got_key = KEY_2; break;
-				case '3':		got_key = KEY_3; break;
-				case '4':		got_key = KEY_4; break;
-				case '5':		got_key = KEY_5; break;
-				case '6':		got_key = KEY_6; break;
-				case '7':		got_key = KEY_7; break;
-				case '8':		got_key = KEY_8; break;
-				case '9':		got_key = KEY_9; break;
-
-				case 27:
-					PostQuitMessage(0);
-				break;
+				gKeyDown[got_key] = true;
 			}
+		}
+		break;
 
-			if (got_key)
-				gKey = got_key;
+		case WM_KEYUP: {
+			int got_key = which_key(LOWORD(wparam), (GetKeyState(VK_SHIFT) & 0x8000) != 0);
+
+			if (got_key) {
+				gKeyDown[got_key] = false;
+			}
 		}
 		break;
 

@@ -133,7 +133,8 @@ enum key_press {
 	KEY_9,
 	KEY_0,
 	KEY_RESET,
-	KEY_CHEAT
+	KEY_CHEAT,
+	KEY_MAX
 };
 
 extern int gKey;
