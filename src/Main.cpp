@@ -78,7 +78,8 @@ int which_key(int c, bool shifted) {
 		return shifted ? KEY_ALT_FIRE : KEY_FIRE;
 
 		case 'R':		return KEY_RESET;
-		case VK_F1:		return shifted ? KEY_CHEAT : KEY_MODE;
+		case VK_F1:		return KEY_MODE;
+		case VK_F2:		return shifted ? KEY_CHEAT : KEY_NONE;
 
 		case '0':		return KEY_0;
 		case '1':		return KEY_1;
@@ -127,13 +128,9 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		}
 		break;
 
-		case WM_KEYUP: {
-			int got_key = which_key(LOWORD(wparam), (GetKeyState(VK_SHIFT) & 0x8000) != 0);
-
-			if (got_key) {
-				gKeyDown[got_key] = false;
-			}
-		}
+		case WM_KEYUP:
+			gKeyDown[which_key(LOWORD(wparam), false)] = false;
+			gKeyDown[which_key(LOWORD(wparam), true)] = false;
 		break;
 
 		case WM_SYSKEYDOWN:
