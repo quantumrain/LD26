@@ -52,9 +52,11 @@ void change_game_state(game_state new_state) {
 	}
 }
 
-void set_active_worm(player_state* ps, int num) {
+void set_active_worm(player_state* ps, map_effects* fx, int num) {
 	SoundPlay(kSid_Switch, 0.75f + num * 0.15f, 0.75f);
 	ps->active_worm = num;
+	fx->selected[num] = 0.25f;
+
 }
 
 void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
@@ -164,7 +166,7 @@ int find_next_best_worm(map* m, player_state* ps, ivec2 p, bool forward) {
 	int best = ps->active_worm;
 	int best_score = forward ? INT_MAX : 0;
 
-	int pivot_score = p.y + p.x * m->size.y;
+	int pivot_score = (m->size.y - p.y) + p.x * m->size.y;
 	int max_score = m->size.x * m->size.y;
 
 	for(int i = 0; i < ps->num_worms; i++) {
@@ -174,7 +176,7 @@ int find_next_best_worm(map* m, player_state* ps, ivec2 p, bool forward) {
 		worm* w = ps->worms + i;
 		ivec2 ap = w->blocks[w->active_block].pos;
 
-		int score = (ap.y + ap.x * m->size.y - pivot_score + max_score) % max_score;
+		int score = ((m->size.y - ap.y) + ap.x * m->size.y - pivot_score + max_score) % max_score;
 
 		if ((forward && score < best_score) || (!forward && score > best_score)) {
 			best = i;
@@ -188,17 +190,19 @@ int find_next_best_worm(map* m, player_state* ps, ivec2 p, bool forward) {
 void update_game_play(map* m, player_state* ps, map_effects* fx) {
 	if (gKey >= KEY_1 && gKey <= KEY_0) {
 		int num = gKey - KEY_1;
-		if (num < ps->num_worms) set_active_worm(ps, num);
+		if (num < ps->num_worms) set_active_worm(ps, fx, num);
 	}
 
 	if (gKey == KEY_FIRE) {
-		worm* w = ps->worms + ps->active_worm;
-		set_active_worm(ps, find_next_best_worm(m, ps, w->blocks[w->active_block].pos, true));
+		set_active_worm(ps, fx, (ps->active_worm + 1) % ps->num_worms);
+		//worm* w = ps->worms + ps->active_worm;
+		//set_active_worm(ps, find_next_best_worm(m, ps, w->blocks[w->active_block].pos, true));
 	}
 
 	if (gKey == KEY_ALT_FIRE) {
-		worm* w = ps->worms + ps->active_worm;
-		set_active_worm(ps, find_next_best_worm(m, ps, w->blocks[w->active_block].pos, false));
+		set_active_worm(ps, fx, (ps->active_worm + ps->num_worms - 1) % ps->num_worms);
+		//worm* w = ps->worms + ps->active_worm;
+		//set_active_worm(ps, find_next_best_worm(m, ps, w->blocks[w->active_block].pos, false));
 	}
 
 	if (gKey == KEY_LEFT) move_worm(m, ps, fx, ivec2(-1, 0));
@@ -208,13 +212,15 @@ void update_game_play(map* m, player_state* ps, map_effects* fx) {
 
 	if (gKey == KEY_CHEAT) {
 		g_level_num++;
-		change_game_state(GS_WIN_LEVEL);
+		change_game_state(GS_RESET_LEVEL);
 	}
 
 	if (gKey == KEY_RESET) {
 		SoundPlay(kSid_Buzz, 0.5f, 1.0f); // TODO: Reset effect
 		change_game_state(GS_RESET_LEVEL);
 	}
+
+	if (gKey == KEY_MODE) toggle_colour_bind(&g_map, &g_ps);
 
 	if (has_won(m, ps)) {
 		change_game_state(GS_WIN_LEVEL);

@@ -78,7 +78,7 @@ int which_key(int c, bool shifted) {
 		return shifted ? KEY_ALT_FIRE : KEY_FIRE;
 
 		case 'R':		return KEY_RESET;
-		case VK_F1:		return KEY_CHEAT;
+		case VK_F1:		return shifted ? KEY_CHEAT : KEY_MODE;
 
 		case '0':		return KEY_0;
 		case '1':		return KEY_1;

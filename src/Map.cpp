@@ -2,6 +2,65 @@
 #include "Common.h"
 #include "Game.h"
 
+#define c0 0.35f
+#define c1 0.85f
+#define c2 0.2f
+#define c3 0.0f
+
+int g_colour_mode;
+
+colour g_colours_standard[MAX_WORMS] = {
+	colour(c1, c0, c0, 1),
+	colour(c0, c1, c0, 1),
+	colour(c0, c0, c1, 1),
+	colour(c1, c1, c0, 1),
+	colour(c0, c1, c1, 1),
+	colour(c1, c0, c1, 1),
+};
+
+colour g_colours_cb0[MAX_WORMS] = {
+	colour(c1, c0, 0, 1),
+	colour(c0, c1, 0, 1),
+	colour(c1, c1, 0, 1),
+	colour(c3, c2, 0, 1),
+	colour(c2, c3, 0, 1),
+	colour(c2, c2, 0, 1),
+};
+
+colour g_colours_cb1[MAX_WORMS] = {
+	colour(0, c1, c0, 1),
+	colour(0, c0, c1, 1),
+	colour(0, c1, c1, 1),
+	colour(0, c2, c3, 1),
+	colour(0, c2, c2, 1),
+	colour(0, c3, c2, 1),
+};
+
+colour g_colours[MAX_WORMS] = {
+	colour(c1, c0, c0, 1),
+	colour(c0, c1, c0, 1),
+	colour(c0, c0, c1, 1),
+	colour(c1, c1, c0, 1),
+	colour(c0, c1, c1, 1),
+	colour(c1, c0, c1, 1),
+};
+
+#undef c0
+#undef c1
+#undef c2
+
+void toggle_colour_bind(map* m, player_state* ps) {
+	switch(g_colour_mode = (g_colour_mode + 1) % 3) {
+		case 0:	memcpy(g_colours, g_colours_standard, sizeof(g_colours)); break;
+		case 1:	memcpy(g_colours, g_colours_cb0, sizeof(g_colours)); break;
+		case 2:	memcpy(g_colours, g_colours_cb1, sizeof(g_colours)); break;
+	}
+
+	for(int i = 0; i < ps->num_worms; i++) {
+		m->colours[i] = g_colours[i];
+	}
+}
+
 void map::destroy() {
 	delete [] data;
 	size = ivec2();
@@ -32,16 +91,16 @@ ivec2 measure_map(const uint8_t* p, const uint8_t* e) {
 	return size;
 }
 
-void set_map(map* m, player_state* gs, int x, int y, uint8_t c) {
+void set_map(map* m, player_state* ps, int x, int y, uint8_t c) {
 	bool clear_tile = c == ' ';
 
 	if (c >= '1' && c <= '9') {
 		int num = c - '1';
 
 		if (num < MAX_WORMS) {
-			worm* w = &gs->worms[num];
+			worm* w = &ps->worms[num];
 
-			gs->num_worms = Max(gs->num_worms, num + 1);
+			ps->num_worms = Max(ps->num_worms, num + 1);
 
 			if (w->num_blocks < MAX_WORM_BLOCKS) {
 				worm_block* b = &w->blocks[w->num_blocks++];
@@ -71,9 +130,9 @@ void set_map(map* m, player_state* gs, int x, int y, uint8_t c) {
 	}
 }
 
-bool load_map(map* m, player_state* gs, const char* path) {
+bool load_map(map* m, player_state* ps, const char* path) {
 	m->destroy();
-	gs->reset();
+	ps->reset();
 
 	file_buf fb;
 
@@ -112,7 +171,7 @@ bool load_map(map* m, player_state* gs, const char* path) {
 		int x = 0;
 
 		while(p < e && *p != '\r' && *p != '\n') {
-			set_map(m, gs, x, y, *p);
+			set_map(m, ps, x, y, *p);
 			x++;
 			p++;
 		}
@@ -121,20 +180,8 @@ bool load_map(map* m, player_state* gs, const char* path) {
 			p++;
 	}
 
-	float c0 = 0.35f;
-	float c1 = 0.85f;
-
-	colour cols[MAX_WORMS] = { // TODO: Colour blind mode
-		colour(c1, c0, c0, 1),
-		colour(c0, c1, c0, 1),
-		colour(c0, c0, c1, 1),
-		colour(c1, c1, c0, 1),
-		colour(c0, c1, c1, 1),
-		colour(c1, c0, c1, 1),
-	};
-
-	for(int i = 0; i < gs->num_worms; i++) {
-		m->colours[i] = cols[i];
+	for(int i = 0; i < ps->num_worms; i++) {
+		m->colours[i] = g_colours[i];
 	}
 
 	return true;
@@ -167,6 +214,7 @@ void render_map(map* m, player_state* ps, map_effects* fx) {
 			fade = colour(1.0f + fx->win, 1.0f);
 		} else {
 			float flash = fabsf(sinf((fx->pulse[i] / 0.2f) * PI * 2.0f)) * 0.25f;
+			flash -= fx->selected[i] * 4.0f;
 			fade = (i == ps->active_worm) ? colour(1.0f - flash, 1.0f) : colour(0.65f - flash, 1.0f);
 		}
 

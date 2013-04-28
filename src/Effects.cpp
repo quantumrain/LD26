@@ -11,6 +11,7 @@ map_effects::map_effects() {
 void map_effects::reset() {
 	for(int i = 0; i < MAX_WORMS; i++) {
 		pulse[i] = 0.0f;
+		selected[i] = 0.0f;
 		jink[i] = vec2();
 		target_active[i] = 0.0f;
 	}
@@ -21,10 +22,12 @@ void map_effects::reset() {
 void update_map_effects(map* m, player_state* ps, map_effects* fx) {
 	for(int i = 0; i < ps->num_worms; i++) {
 		float& f = fx->pulse[i];
+		float& s = fx->selected[i];
 		vec2& j = fx->jink[i];
 		float& t = fx->target_active[i];
 
 		f = Max(f - DT, 0.0f);
+		s = Max(s - DT, 0.0f);
 		j *= 0.8f;
 
 		ivec2 tp = m->targets[i];

@@ -135,6 +135,7 @@ enum key_press {
 	KEY_0,
 	KEY_RESET,
 	KEY_CHEAT,
+	KEY_MODE,
 	KEY_MAX
 };
 

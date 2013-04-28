@@ -58,6 +58,7 @@ struct player_state {
 
 struct map_effects {
 	float pulse[MAX_WORMS];
+	float selected[MAX_WORMS];
 	vec2 jink[MAX_WORMS];
 	float target_active[MAX_WORMS];
 	float win;
@@ -76,6 +77,8 @@ enum effect_type {
 vec2 to_screen(ivec2 v);
 bool load_map(map* m, player_state* gs, const char* path);
 void render_map(map* m, player_state* gs, map_effects* fx);
+
+void toggle_colour_bind(map* m, player_state* ps);
 
 int block_at(worm* w, ivec2 pos);
 int worm_at(player_state* ps, ivec2 pos);
