@@ -337,13 +337,14 @@ void GameUpdate() {
 
 	if (g_gs == GS_TITLE) {
 		set_camera(vec2(), 10.0f);
-		draw_string(vec2(0.0f, -1.0f), vec2(0.1f), TEXT_CENTRE, colour(), "Gravity Worm");
-		draw_string(vec2(0.0f, 3.0f), vec2(0.04f), TEXT_CENTRE, colour(0.5f), "Created for Ludum Dare 26: Minimalism");
-		draw_string(vec2(0.0f, 3.5f), vec2(0.04f), TEXT_CENTRE, colour(0.5f), "by Stephen Cakebread");
-		draw_string(vec2(0.0f, 4.0f), vec2(0.04f), TEXT_CENTRE, colour(0.5f), "t: @quantumrain");
+		draw_string(vec2(0.0f, -1.0f), vec2(0.1f), TEXT_CENTRE, colour(), "gravity worm");
+		draw_string(vec2(0.0f, 3.0f), vec2(0.04f), TEXT_CENTRE, colour(0.1f), "Created for Ludum Dare 26: Minimalism");
+		draw_string(vec2(0.0f, 3.5f), vec2(0.04f), TEXT_CENTRE, colour(0.1f), "by Stephen Cakebread");
+		draw_string(vec2(0.0f, 4.0f), vec2(0.04f), TEXT_CENTRE, colour(0.1f), "t: @quantumrain");
 	} else if (g_gs == GS_COMPLETE) {
 		set_camera(vec2(), 10.0f);
 		draw_string(vec2(0.0f, -1.0f), vec2(0.1f), TEXT_CENTRE, colour(), "Success");
+		draw_string(vec2(0.0f, 3.0f), vec2(0.04f), TEXT_CENTRE, colour(0.1f), "Thank you for playing");
 	} else {
 		vec2 size(to_vec2(g_map.br - g_map.tl));
 		vec2 centre(to_vec2(g_map.br + g_map.tl) * vec2(0.5f, 0.5f));
