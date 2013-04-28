@@ -349,8 +349,13 @@ void GameUpdate() {
 		vec2 size(to_vec2(g_map.br - g_map.tl));
 		vec2 centre(to_vec2(g_map.br + g_map.tl) * vec2(0.5f, 0.5f));
 
+		vec2 win_size = to_vec2(g_WinSize);
+		float win_ratio = win_size.y / win_size.x;
+
 		vec2 cam_pos = centre;
 		float width = 10.0f;
+
+		width = Max(width, ((size.y + 2.0f) / win_ratio) * 0.5f);
 
 		set_camera(cam_pos, width);
 		render_map(&g_map, &g_ps, &g_map_fx);
