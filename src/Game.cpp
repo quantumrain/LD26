@@ -155,14 +155,46 @@ bool has_won(map* m, player_state* ps) {
 	return true;
 }
 
+int find_next_best_worm(map* m, player_state* ps, ivec2 p, bool forward) {
+	int best = ps->active_worm;
+	int best_score = forward ? INT_MAX : 0;
+
+	int pivot_score = p.y + p.x * m->size.y;
+	int max_score = m->size.x * m->size.y;
+
+	for(int i = 0; i < ps->num_worms; i++) {
+		if (i == ps->active_worm)
+			continue;
+
+		worm* w = ps->worms + i;
+		ivec2 ap = w->blocks[w->active_block].pos;
+
+		int score = (ap.y + ap.x * m->size.y - pivot_score + max_score) % max_score;
+
+		if ((forward && score < best_score) || (!forward && score > best_score)) {
+			best = i;
+			best_score = score;
+		}
+	}
+
+	return best;
+}
+
 void update_game_play(map* m, player_state* ps, map_effects* fx) {
 	if (gKey >= KEY_1 && gKey <= KEY_0) {
 		int num = gKey - KEY_1;
 		if (num < ps->num_worms) set_active_worm(ps, num);
 	}
-		
-	if (gKey == KEY_FIRE) set_active_worm(ps, (ps->active_worm + 1) % ps->num_worms);
-	if (gKey == KEY_ALT_FIRE) set_active_worm(ps, (ps->active_worm + ps->num_worms - 1) % ps->num_worms);
+
+	if (gKey == KEY_FIRE) {
+		worm* w = ps->worms + ps->active_worm;
+		set_active_worm(ps, find_next_best_worm(m, ps, w->blocks[w->active_block].pos, true));
+	}
+
+	if (gKey == KEY_ALT_FIRE) {
+		worm* w = ps->worms + ps->active_worm;
+		set_active_worm(ps, find_next_best_worm(m, ps, w->blocks[w->active_block].pos, false));
+	}
 
 	if (gKey == KEY_LEFT) move_worm(m, ps, fx, ivec2(-1, 0));
 	if (gKey == KEY_RIGHT) move_worm(m, ps, fx, ivec2(1, 0));
