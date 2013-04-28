@@ -115,3 +115,12 @@ bool all_worms_anchored(map* m, player_state* ps) {
 
 	return true;
 }
+
+bool has_won(map* m, player_state* ps) {
+	for(int i = 0; i < ps->num_worms; i++) {
+		if (block_at(ps->worms + i, m->targets[i] + m->target_dir[i]) < 0)
+			return false;
+	}
+
+	return true;
+}

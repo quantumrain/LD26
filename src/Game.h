@@ -14,6 +14,7 @@ struct map {
 	uint8_t* data;
 	colour colours[MAX_WORMS];
 	ivec2 targets[MAX_WORMS];
+	ivec2 target_dir[MAX_WORMS];
 
 	ivec2 tl;
 	ivec2 br;
@@ -87,6 +88,7 @@ int next_oldest_block(worm* w, int min_age);
 bool is_worm_split(map* m, player_state* ps, worm* w);
 int anchor_block(map* m, player_state* ps, worm* w);
 bool all_worms_anchored(map* m, player_state* gs);
+bool has_won(map* m, player_state* ps);
 
 void update_map_effects(map* m, player_state* ps, map_effects* fx);
 void spawn_effect(effect_type type, ivec2 pos, ivec2 dir, colour col);

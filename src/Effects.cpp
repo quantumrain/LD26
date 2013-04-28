@@ -30,18 +30,7 @@ void update_map_effects(map* m, player_state* ps, map_effects* fx) {
 		s = Max(s - DT, 0.0f);
 		j *= 0.8f;
 
-		ivec2 tp = m->targets[i];
-
-		if (
-			(block_at(ps->worms + i, tp + ivec2(-1, 0)) >= 0) ||
-			(block_at(ps->worms + i, tp + ivec2(1, 0)) >= 0) ||
-			(block_at(ps->worms + i, tp + ivec2(0, -1)) >= 0) ||
-			(block_at(ps->worms + i, tp + ivec2(0, 1)) >= 0)
-		) {
-			t = Lerp(t, 1.0f, 0.2f);
-		} else {
-			t = Lerp(t, 0.0f, 0.2f);
-		}
+		t = Lerp(t, (block_at(ps->worms + i, m->targets[i] + m->target_dir[i]) >= 0) ? 1.0f : 0.0f, 0.2f);
 	}
 }
 

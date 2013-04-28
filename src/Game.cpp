@@ -53,10 +53,11 @@ void change_game_state(game_state new_state) {
 }
 
 void set_active_worm(player_state* ps, map_effects* fx, int num) {
-	SoundPlay(kSid_Switch, 0.75f + num * 0.15f, 0.75f);
-	ps->active_worm = num;
-	fx->selected[num] = 0.25f;
-
+	if (ps->active_worm != num) {
+		SoundPlay(kSid_Switch, 0.75f + num * 0.15f, 0.75f);
+		ps->active_worm = num;
+		fx->selected[num] = 0.25f;
+	}
 }
 
 void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
@@ -116,8 +117,8 @@ void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
 		b->age = ++w->age;
 
 		if (!is_worm_split(m, ps, w)) {
-			if (all_worms_anchored(m, ps)) {
-				SoundPlay(kSid_Dit, 1.5f, 0.25f); // TODO: Success effect
+			if (all_worms_anchored(m, ps)) { // TODO: Needs to check that worms aren't supporting each other
+				SoundPlay(kSid_Dit, 1.5f, 0.25f);
 				break;
 			}
 
@@ -143,23 +144,6 @@ void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
 
 		*ps = old_ps;
 	}
-}
-
-bool has_won(map* m, player_state* ps) {
-	for(int i = 0; i < ps->num_worms; i++) {
-		worm* w = ps->worms + i;
-
-		if (
-			(block_at(w, m->targets[i] + ivec2(-1, 0)) < 0) &&
-			(block_at(w, m->targets[i] + ivec2(1, 0)) < 0) &&
-			(block_at(w, m->targets[i] + ivec2(0, -1)) < 0) &&
-			(block_at(w, m->targets[i] + ivec2(0, 1)) < 0)
-		) {
-			return false;
-		}
-	}
-
-	return true;
 }
 
 int find_next_best_worm(map* m, player_state* ps, ivec2 p, bool forward) {
@@ -222,6 +206,58 @@ void update_game_play(map* m, player_state* ps, map_effects* fx) {
 
 	if (gKey == KEY_MODE) toggle_colour_bind(&g_map, &g_ps);
 
+	// Mouse control, easier to use, but flaky right now
+	/*static bool was_down;
+
+	if (gMouseButtons & 1) {
+		vec2 fp = to_game((to_vec2(gMousePos) / to_vec2(g_WinSize)) * 2.0f - 1.0f);
+		ivec2 p((int)fp.x, (int)fp.y);
+
+		static ivec2 first_pos;
+		static int first_worm;
+
+		if (!was_down) {
+			first_pos = p;
+			was_down = true;
+
+			first_worm = worm_at(&g_ps, first_pos);
+
+			if (first_worm >= 0) {
+				set_active_worm(&g_ps, &g_map_fx, first_worm);
+			}
+		}
+
+		if (first_worm >= 0) {
+			worm* w = g_ps.worms + first_worm;
+			int bi = block_at(w, p);
+
+			if (bi >= 0) {
+				if (w->active_block != bi) {
+					SoundPlay(kSid_Dit, 2.0f, 0.25f);
+					w->active_block = bi;
+					w->blocks[bi].age = ++w->age;
+				}
+
+				first_pos = p;
+			} else {
+				if (first_pos != p) {
+					ivec2 ap = w->blocks[w->active_block].pos;
+
+					if (p != ap) {
+						if (p.x < ap.x) move_worm(m, ps, fx, ivec2(-1, 0));
+						if (p.x > ap.x) move_worm(m, ps, fx, ivec2(1, 0));
+						if (p.y < ap.y) move_worm(m, ps, fx, ivec2(0, -1));
+						if (p.y > ap.y) move_worm(m, ps, fx, ivec2(0, 1));
+					}
+				}
+
+				first_pos = p;
+			}
+		}
+	} else {
+		was_down = false;
+	}*/
+
 	if (has_won(m, ps)) {
 		change_game_state(GS_WIN_LEVEL);
 	}
@@ -264,6 +300,8 @@ void update_game(map* m, player_state* ps, map_effects* fx) {
 }
 
 void GameInit() {
+	void init_colours();
+	init_colours();
 	change_game_state(GS_LEVEL_INTRO);
 }
 
@@ -284,11 +322,15 @@ void GameUpdate() {
 
 	switch(g_gs) {
 		case GS_LEVEL_INTRO:
-			draw_rect(vec2(), to_vec2(g_map.size), colour(0.0f, 1.0f - (Max(g_state_time - 0.5f, 0.0f) / 1.5f)));
+			set_tint(colour(Max(g_state_time - 0.5f, 0.0f) / 1.5f));
 		break;
 
 		case GS_LEVEL_OUTRO:
-			draw_rect(vec2(), to_vec2(g_map.size), colour(0.0f, g_state_time / 1.5f));
+			set_tint(colour(1.0f - (g_state_time / 1.5f)));
+		break;
+
+		default:
+			set_tint(colour());
 		break;
 	}
 

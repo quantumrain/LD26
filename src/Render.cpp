@@ -20,10 +20,19 @@ const int kMaxRectVerts = 64 * 1024;
 Vertex gRectVerts[kMaxRectVerts];
 int gRectVertCount;
 vec4 gCam;
+colour gTint;
 
 void set_camera(vec2 centre, float width) {
-	float ratio = g_WinHeight / (float)g_WinWidth;
+	float ratio = g_WinSize.y / (float)g_WinSize.x;
 	gCam = vec4(-centre, 1.0f / vec2(width, -width * ratio));
+}
+
+vec2 to_game(vec2 screen) {
+	return screen / vec2(gCam.z, -gCam.w) - vec2(gCam.x, gCam.y);
+}
+
+void set_tint(colour tint) {
+	gTint = tint;
 }
 
 void draw_rect(vec2 p0, vec2 p1, colour colour) {
@@ -286,7 +295,7 @@ void RenderInit()
 	gRectVb		= gpu::CreateVertexBuffer(sizeof(Vertex), kMaxRectVerts);
 	gFsQuadVb	= gpu::CreateVertexBuffer(sizeof(Vertex), 3);
 
-	ivec2 size(g_WinWidth, g_WinHeight);
+	ivec2 size(g_WinSize);
 
 	g_draw_target = gpu::CreateTexture2d(size.x, size.y);
 
@@ -367,9 +376,10 @@ void RenderGame()
 
 	// draw
 	gpu::SetRenderTarget(g_draw_target);
-	gpu::SetViewport(ivec2(0, 0), ivec2(g_WinWidth, g_WinHeight), vec2(0.0f, 1.0f));
-	gpu::Clear(0x00000000);
+	gpu::SetViewport(ivec2(0, 0), g_WinSize, vec2(0.0f, 1.0f));
+	gpu::Clear(0x00060606);
 	gpu::SetVsConst(0, gCam);
+	gpu::SetPsConst(0, *(vec4*)&gTint);
 	gpu::Draw(gRectDecl, gRectVb, gRectVertCount, true, false);
 
 	for(int i = 0; i < MAX_BLOOM_LEVELS; i++) {
@@ -402,7 +412,7 @@ void RenderGame()
 
 	// combine
 	gpu::SetDefaultRenderTarget();
-	gpu::SetViewport(ivec2(0, 0), ivec2(g_WinWidth, g_WinHeight), vec2(0.0f, 1.0f));
+	gpu::SetViewport(ivec2(0, 0), g_WinSize, vec2(0.0f, 1.0f));
 	gpu::SetPsConst(0, vec4(500.0f) + vec4(FRand(1000.0f), FRand(1000.0f), FRand(1000.0f), FRand(1000.0f)));
 	gpu::SetTexture(0, g_draw_target);
 	gpu::SetSampler(0, true, false);
@@ -410,5 +420,5 @@ void RenderGame()
 		gpu::SetTexture(1 + i, g_bloom_levels[i].blur_y);
 		gpu::SetSampler(1 + i, true, true);
 	}
-	do_fullscreen_quad(gCombineDecl, to_vec2(ivec2(g_WinWidth, g_WinHeight)));
+	do_fullscreen_quad(gCombineDecl, to_vec2(g_WinSize));
 }

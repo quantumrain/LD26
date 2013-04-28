@@ -2,6 +2,11 @@
 #include "Common.h"
 #include "Game.h"
 
+#define s0 0.15f
+#define s1 0.5f
+#define s2 0.7f
+#define s4 0.25f
+
 #define c0 0.35f
 #define c1 0.85f
 #define c2 0.2f
@@ -10,12 +15,12 @@
 int g_colour_mode;
 
 colour g_colours_standard[MAX_WORMS] = {
-	colour(c1, c0, c0, 1),
-	colour(c0, c1, c0, 1),
-	colour(c0, c0, c1, 1),
-	colour(c1, c1, c0, 1),
-	colour(c0, c1, c1, 1),
-	colour(c1, c0, c1, 1),
+	colour(s2, s0, s1, 1),
+	colour(s1, s2, s0, 1),
+	colour(s0, s1, s2, 1),
+	colour(s2, s1, s0, 1),
+	colour(s0, s2, s1, 1),
+	colour(s1, s0, s2, 1),
 };
 
 colour g_colours_cb0[MAX_WORMS] = {
@@ -36,18 +41,18 @@ colour g_colours_cb1[MAX_WORMS] = {
 	colour(0, c3, c2, 1),
 };
 
-colour g_colours[MAX_WORMS] = {
-	colour(c1, c0, c0, 1),
-	colour(c0, c1, c0, 1),
-	colour(c0, c0, c1, 1),
-	colour(c1, c1, c0, 1),
-	colour(c0, c1, c1, 1),
-	colour(c1, c0, c1, 1),
-};
-
+#undef s0
+#undef s1
 #undef c0
 #undef c1
 #undef c2
+#undef c3
+
+colour g_colours[MAX_WORMS];
+
+void init_colours() {
+	memcpy(g_colours, g_colours_standard, sizeof(g_colours));
+}
 
 void toggle_colour_bind(map* m, player_state* ps) {
 	switch(g_colour_mode = (g_colour_mode + 1) % 3) {
@@ -181,7 +186,16 @@ bool load_map(map* m, player_state* ps, const char* path) {
 	}
 
 	for(int i = 0; i < ps->num_worms; i++) {
+		ivec2 tp = m->targets[i];
+		ivec2 dir;
+		
+		if (m->at(tp.x - 1, tp.y) == TILE_EMPTY) dir.x--;
+		if (m->at(tp.x + 1, tp.y) == TILE_EMPTY) dir.x++;
+		if (m->at(tp.x, tp.y - 1) == TILE_EMPTY) dir.y--;
+		if (m->at(tp.x, tp.y + 1) == TILE_EMPTY) dir.y++;
+
 		m->colours[i] = g_colours[i];
+		m->target_dir[i] = dir;
 	}
 
 	return true;
@@ -189,7 +203,7 @@ bool load_map(map* m, player_state* ps, const char* path) {
 
 void render_map(map* m, player_state* ps, map_effects* fx) {
 	ivec2 size = m->size;
-	colour c(Lerp(0.1f, 0.0f, Min(fx->win, 1.0f)), 1.0f);
+	colour c(Lerp(0.15f, 0.0f, Min(fx->win, 1.0f)), 1.0f - Min(fx->win, 1.0f));
 
 	for(int y = 0; y < size.y; y++) {
 		for(int x = 0; x < size.x; x++) {
@@ -211,11 +225,11 @@ void render_map(map* m, player_state* ps, map_effects* fx) {
 		colour fade;
 
 		if (fx->win > 0.0f) {
-			fade = colour(1.0f + fx->win, 1.0f);
+			fade = colour(1.0f + Max(fx->win, Square(fx->win * 1.1f)), 1.0f);
 		} else {
 			float flash = fabsf(sinf((fx->pulse[i] / 0.2f) * PI * 2.0f)) * 0.25f;
 			flash -= fx->selected[i] * 4.0f;
-			fade = (i == ps->active_worm) ? colour(1.0f - flash, 1.0f) : colour(0.65f - flash, 1.0f);
+			fade = colour(1.0f - flash, 1.0f);
 		}
 
 		for(int j = 0; j < w->num_blocks; j++) {
@@ -254,20 +268,21 @@ void render_map(map* m, player_state* ps, map_effects* fx) {
 
 		{
 			ivec2 tp = m->targets[i];
+			ivec2 td = m->target_dir[i];
 			vec2 p0(to_vec2(tp));
 			vec2 p1(p0);
 			colour c(m->colours[i]);
 			float t = 0.5f;
 
 			if (fx->win > 0.0f)
-				c = c * (1.0f + fx->win);
+				c = c * (1.0f + Max(fx->win, Square(fx->win * 1.1f)));
 			else
 				c = c * colour(Lerp(0.35f, 1.0f, fx->target_active[i]), 0.65f);
 
-			if (m->at(tp.x - 1, tp.y) == TILE_EMPTY) { p0 += vec2(0.1f, 0.1f);		p1 += vec2(t, 0.9f); }
-			if (m->at(tp.x + 1, tp.y) == TILE_EMPTY) { p0 += vec2(1.0f - t, 0.1f);	p1 += vec2(0.9f, 0.9f); }
-			if (m->at(tp.x, tp.y - 1) == TILE_EMPTY) { p0 += vec2(0.1f, 0.1f);		p1 += vec2(0.9f, t); }
-			if (m->at(tp.x, tp.y + 1) == TILE_EMPTY) { p0 += vec2(0.1f, 1.0f - t);	p1 += vec2(0.9f, 0.9f); }
+			if (td.x < 0) { p0 += vec2(0.1f, 0.1f);		p1 += vec2(t, 0.9f); }
+			if (td.x > 0) { p0 += vec2(1.0f - t, 0.1f);	p1 += vec2(0.9f, 0.9f); }
+			if (td.y < 0) { p0 += vec2(0.1f, 0.1f);		p1 += vec2(0.9f, t); }
+			if (td.y > 0) { p0 += vec2(0.1f, 1.0f - t);	p1 += vec2(0.9f, 0.9f); }
 
 			draw_rect(p0, p1 , c);
 		}

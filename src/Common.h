@@ -139,7 +139,10 @@ enum key_press {
 	KEY_MAX
 };
 
+extern ivec2 g_WinSize;
 extern int gKey;
+extern ivec2 gMousePos;
+extern int gMouseButtons;
 
 // Debug
 
@@ -147,9 +150,6 @@ void DebugLn(const char* txt, ...);
 void Panic(const char* msg);
 
 // Gpu
-
-extern int g_WinWidth;
-extern int g_WinHeight;
 
 namespace gpu
 {
@@ -194,6 +194,8 @@ struct Vertex
 };
 
 void set_camera(vec2 centre, float width);
+vec2 to_game(vec2 screen);
+void set_tint(colour tint);
 void draw_rect(vec2 p0, vec2 p1, colour c);
 void draw_rect(vec2 p0, vec2 p1, colour c0, colour c1, colour c2, colour c3);
 void draw_quad(vec2 p0, vec2 p1, vec2 p2, vec2 p3, colour c0, colour c1, colour c2, colour c3);

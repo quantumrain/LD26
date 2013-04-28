@@ -2,8 +2,7 @@
 #include "Common.h"
 #include "resource.h"
 
-int g_WinWidth = 1152;
-int g_WinHeight	= 640;
+ivec2 g_WinSize(1152, 640);
 
 HWND gMainWnd;
 
@@ -12,7 +11,9 @@ IDirect3DDevice9* gDevice;
 
 bool gHasFocus;
 int gKey;
-bool gKeyDown[KEY_MAX];
+DWORD gKeyDown[KEY_MAX];
+ivec2 gMousePos;
+int gMouseButtons;
 
 void RenderInit();
 void RenderShutdown();
@@ -22,13 +23,13 @@ void GetPresentParams(D3DPRESENT_PARAMETERS* pp)
 	RECT rc;
 	GetClientRect(gMainWnd, &rc);
 
-	g_WinWidth = Max<int>(rc.right - rc.left, 16);
-	g_WinHeight = Max<int>(rc.bottom - rc.top, 16);
+	g_WinSize.x = Max<int>(rc.right - rc.left, 16);
+	g_WinSize.y = Max<int>(rc.bottom - rc.top, 16);
 
 	pp->Windowed				= TRUE;
 	pp->SwapEffect				= D3DSWAPEFFECT_DISCARD;
-	pp->BackBufferWidth			= g_WinWidth;
-	pp->BackBufferHeight		= g_WinHeight;
+	pp->BackBufferWidth			= g_WinSize.x;
+	pp->BackBufferHeight		= g_WinSize.y;
 	pp->BackBufferFormat		= D3DFMT_A8R8G8B8;
 	pp->hDeviceWindow			= gMainWnd;
 	pp->PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
@@ -108,36 +109,8 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch(msg)
 	{
-		case WM_ACTIVATE:
-			gHasFocus = wparam != WA_INACTIVE;
-
-			if (!gHasFocus) {
-				memset(gKeyDown, 0, sizeof(gKeyDown));
-			}
-		break;
-
-		case WM_KEYDOWN: {
-			int got_key = which_key(LOWORD(wparam), (GetKeyState(VK_SHIFT) & 0x8000) != 0);
-
-			if (got_key) {
-				if (!gKeyDown[got_key])
-					gKey = got_key;
-
-				gKeyDown[got_key] = true;
-			}
-		}
-		break;
-
-		case WM_KEYUP:
-			gKeyDown[which_key(LOWORD(wparam), false)] = false;
-			gKeyDown[which_key(LOWORD(wparam), true)] = false;
-		break;
-
-		case WM_SYSKEYDOWN:
-			if ((GetAsyncKeyState(VK_MENU) & 0x8000) && (GetAsyncKeyState(VK_F4) & 0x8000))
-			{
-				PostQuitMessage(0);
-			}
+		case WM_CLOSE:
+			PostQuitMessage(0);
 		return 0;
 
 		case WM_SIZE:
@@ -152,8 +125,66 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			DoFrame();
 		return 0;
 
-		case WM_CLOSE:
-			PostQuitMessage(0);
+		case WM_ACTIVATE:
+			gHasFocus = wparam != WA_INACTIVE;
+
+			if (!gHasFocus) {
+				memset(gKeyDown, 0, sizeof(gKeyDown));
+			}
+		break;
+
+		// Keys
+
+		case WM_KEYDOWN: {
+			int got_key = which_key(LOWORD(wparam), (GetKeyState(VK_SHIFT) & 0x8000) != 0);
+
+			if (got_key) {
+				DWORD t = GetTickCount();
+
+				if (!gKeyDown[got_key] || (t - gKeyDown[got_key]) > 200) {
+					gKey = got_key;
+					gKeyDown[got_key] = t;
+				}
+			}
+		}
+		break;
+
+		case WM_KEYUP:
+			gKeyDown[which_key(LOWORD(wparam), false)] = 0;
+			gKeyDown[which_key(LOWORD(wparam), true)] = 0;
+		break;
+
+		case WM_SYSKEYDOWN:
+			if ((GetAsyncKeyState(VK_MENU) & 0x8000) && (GetAsyncKeyState(VK_F4) & 0x8000))
+			{
+				PostQuitMessage(0);
+			}
+		return 0;
+
+		// Mouse
+
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+			SetCapture(hwnd);
+			gMouseButtons |= 1;
+			gMousePos.x = GET_X_LPARAM(lparam);
+			gMousePos.y = GET_Y_LPARAM(lparam);
+		return 0;
+
+		case WM_LBUTTONUP:
+			gMouseButtons &= ~1;
+			gMousePos.x = GET_X_LPARAM(lparam);
+			gMousePos.y = GET_Y_LPARAM(lparam);
+			ReleaseCapture();
+		return 0;
+
+		case WM_MOUSEMOVE:
+			gMousePos.x = GET_X_LPARAM(lparam);
+			gMousePos.y = GET_Y_LPARAM(lparam);
+		return 0;
+
+		case WM_CAPTURECHANGED:
+			gMouseButtons = 0;
 		return 0;
 	}
 
@@ -175,13 +206,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	DWORD	style	= WS_OVERLAPPEDWINDOW;
 	DWORD	styleEx = WS_EX_OVERLAPPEDWINDOW;
-	RECT	rcWin	= { 0, 0, g_WinWidth, g_WinHeight };
+	RECT	rcWin	= { 0, 0, g_WinSize.x, g_WinSize.y };
 
 	RECT rcDesk;
 	GetClientRect(GetDesktopWindow(), &rcDesk);
 
 	AdjustWindowRectEx(&rcWin, style, FALSE, styleEx);
-	OffsetRect(&rcWin, ((rcDesk.right - rcDesk.left) - g_WinWidth) / 2, ((rcDesk.bottom - rcDesk.top) - g_WinHeight) / 2);
+	OffsetRect(&rcWin, ((rcDesk.right - rcDesk.left) - g_WinSize.x) / 2, ((rcDesk.bottom - rcDesk.top) - g_WinSize.y) / 2);
 
 	gMainWnd = CreateWindowEx(styleEx, wc.lpszClassName, L"LD26 - Gravity Worm", style, rcWin.left, rcWin.top, rcWin.right - rcWin.left, rcWin.bottom - rcWin.top, 0, 0, 0, 0);
 
