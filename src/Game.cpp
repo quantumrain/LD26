@@ -8,6 +8,7 @@ enum game_state {
 	GS_LEVEL_OUTRO,
 	GS_RESET_LEVEL,
 	GS_WIN_LEVEL,
+	GS_WIN_GAME
 };
 
 game_state g_gs;
@@ -34,7 +35,7 @@ void change_game_state(game_state new_state) {
 		case GS_LEVEL_INTRO:
 		case GS_RESET_LEVEL:
 			if (!load_level(g_level_num)) {
-				DebugLn("Level missing!");
+				Panic("Missing map file!");
 			}
 		break;
 
@@ -42,7 +43,11 @@ void change_game_state(game_state new_state) {
 		break;
 
 		case GS_WIN_LEVEL:
-			SoundPlay(kSid_Win, 1.0f, 1.0f); // TODO: Win effect
+			SoundPlay(kSid_Win, 1.0f, 1.0f);
+		break;
+
+		case GS_WIN_GAME:
+			// TODO: Win game!
 		break;
 	}
 }
@@ -203,7 +208,7 @@ void update_game_play(map* m, player_state* ps, map_effects* fx) {
 
 	if (gKey == KEY_CHEAT) {
 		g_level_num++;
-		change_game_state(GS_RESET_LEVEL);
+		change_game_state(GS_WIN_LEVEL);
 	}
 
 	if (gKey == KEY_RESET) {
@@ -233,7 +238,7 @@ void update_game(map* m, player_state* ps, map_effects* fx) {
 
 		case GS_LEVEL_OUTRO:
 			g_map_fx.win += DT;
-			if ((g_state_time += DT) >= 0.75f) {
+			if ((g_state_time += DT) >= 1.5f) {
 				change_game_state(GS_LEVEL_INTRO);
 			}
 		break;
@@ -273,11 +278,11 @@ void GameUpdate() {
 
 	switch(g_gs) {
 		case GS_LEVEL_INTRO:
-			draw_rect(vec2(), to_vec2(g_map.size), colour(0.0f, 1.0f - Max(g_state_time - 0.5f, 0.0f) / 1.5f));
+			draw_rect(vec2(), to_vec2(g_map.size), colour(0.0f, 1.0f - (Max(g_state_time - 0.5f, 0.0f) / 1.5f)));
 		break;
 
 		case GS_LEVEL_OUTRO:
-			draw_rect(vec2(), to_vec2(g_map.size), colour(0.0f, Square(g_state_time / 0.75f)));
+			draw_rect(vec2(), to_vec2(g_map.size), colour(0.0f, g_state_time / 1.5f));
 		break;
 	}
 

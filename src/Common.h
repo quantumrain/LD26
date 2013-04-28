@@ -101,7 +101,8 @@ inline colour operator/(const colour& lhs, const colour& rhs) { return colour(lh
 
 inline float FRand(float mag) { return ((float)rand() / (float)RAND_MAX) * mag; }
 inline float SignedFRand(float mag) { return FRand(2.0f * mag) - mag; }
-inline vec2 RandBox(float magX, float magY) { return vec2(SignedFRand(magX), SignedFRand(magY)); }
+inline vec2 RandBox(float magX, float magY) { return vec2(FRand(magX), FRand(magY)); }
+inline vec2 SignedRandBox(float magX, float magY) { return vec2(SignedFRand(magX), SignedFRand(magY)); }
 
 int hash(const uint8_t* data, int size);
 float gaussian(float n, float theta);
