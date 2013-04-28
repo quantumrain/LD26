@@ -160,6 +160,8 @@ bool load_map(map* m, player_state* ps, const char* path) {
 		return false;
 	}
 
+	memset(m->data, 0, m->size.x * m->size.y);
+
 	bool new_line = false;
 	bool add_line = false;
 
