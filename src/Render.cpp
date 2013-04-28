@@ -176,6 +176,81 @@ void draw_rect(vec2 p0, vec2 p1, colour c0, colour c1, colour c2, colour c3) {
 	v->a = c3.a;
 }
 
+void draw_quad(vec2 p0, vec2 p1, vec2 p2, vec2 p3, colour c0, colour c1, colour c2, colour c3) {
+	if ((gRectVertCount + 6) > kMaxRectVerts)
+	{
+		DebugLn("DrawRect overflow");
+		return;
+	}
+
+	Vertex* v = &gRectVerts[gRectVertCount];
+
+	gRectVertCount += 6;
+
+	// t0
+
+	v->x = p0.x;
+	v->y = p0.y;
+	v->u = 0.0f;
+	v->v = 0.0f;
+	v->r = c0.r;
+	v->g = c0.g;
+	v->b = c0.b;
+	v->a = c0.a;
+	v++;
+
+	v->x = p2.x;
+	v->y = p2.y;
+	v->u = 0.0f;
+	v->v = 0.0f;
+	v->r = c2.r;
+	v->g = c2.g;
+	v->b = c2.b;
+	v->a = c2.a;
+	v++;
+
+	v->x = p1.x;
+	v->y = p1.y;
+	v->u = 0.0f;
+	v->v = 0.0f;
+	v->r = c1.r;
+	v->g = c1.g;
+	v->b = c1.b;
+	v->a = c1.a;
+	v++;
+
+	// t1
+
+	v->x = p1.x;
+	v->y = p1.y;
+	v->u = 0.0f;
+	v->v = 0.0f;
+	v->r = c1.r;
+	v->g = c1.g;
+	v->b = c1.b;
+	v->a = c1.a;
+	v++;
+
+	v->x = p2.x;
+	v->y = p2.y;
+	v->u = 0.0f;
+	v->v = 0.0f;
+	v->r = c2.r;
+	v->g = c2.g;
+	v->b = c2.b;
+	v->a = c2.a;
+	v++;
+
+	v->x = p3.x;
+	v->y = p3.y;
+	v->u = 0.0f;
+	v->v = 0.0f;
+	v->r = c3.r;
+	v->g = c3.g;
+	v->b = c3.b;
+	v->a = c3.a;
+}
+
 struct bloom_level {
 	ivec2 size;
 	gpu::Texture2d* reduce;
@@ -247,7 +322,7 @@ void do_fullscreen_quad(gpu::ShaderDecl* decl, vec2 size)
 
 		v->x = -1.0f + ax;
 		v->y = -1.0f + ay;
-		v->u = 0.0f; // TODO: pixel centres...
+		v->u = 0.0f;
 		v->v = 1.0f;
 		v->r = v->g = v->b = v->a = 1.0f;
 		v++;
@@ -269,7 +344,7 @@ void do_fullscreen_quad(gpu::ShaderDecl* decl, vec2 size)
 	}
 
 	gpu::SetVsConst(0, vec4(0, 0, 1.0f, 1.0f));
-	gpu::Draw(decl, gFsQuadVb, 3, false);
+	gpu::Draw(decl, gFsQuadVb, 3, false, false);
 }
 
 void RenderGame()
@@ -285,7 +360,7 @@ void RenderGame()
 	gpu::SetViewport(ivec2(0, 0), ivec2(kWinWidth, kWinHeight), vec2(0.0f, 1.0f));
 	gpu::Clear(0x00000000);
 	gpu::SetVsConst(0, gCam);
-	gpu::Draw(gRectDecl, gRectVb, gRectVertCount, true);
+	gpu::Draw(gRectDecl, gRectVb, gRectVertCount, true, false);
 
 	for(int i = 0; i < MAX_BLOOM_LEVELS; i++) {
 		bloom_level* bl = g_bloom_levels + i;

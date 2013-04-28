@@ -215,7 +215,7 @@ namespace gpu
 		gDevice->SetPixelShaderConstantF(slot, (float*)&v, 1);
 	}
 
-	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count, bool alpha_blend)
+	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count, bool alpha_blend, bool as_lines)
 	{
 		if (!decl || !vb)
 			return;
@@ -239,7 +239,11 @@ namespace gpu
 		gDevice->SetStreamSource(0, vb->vb, 0, sizeof(Vertex));
 		gDevice->SetVertexShader(decl->vertex);
 		gDevice->SetPixelShader(decl->pixel);
-		gDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, count / 3);
+
+		if (as_lines)
+			gDevice->DrawPrimitive(D3DPT_LINESTRIP, 0, count - 1);
+		else
+			gDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, count / 3);
 	}
 
 }

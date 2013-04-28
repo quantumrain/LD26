@@ -140,21 +140,18 @@ bool load_map(map* m, player_state* gs, const char* path) {
 	return true;
 }
 
-void render_map(map* m, player_state* gs) {
+void render_map(map* m, player_state* gs, map_effects* fx) {
 	ivec2 size = m->size;
 
 	for(int y = 0; y < size.y; y++) {
 		for(int x = 0; x < size.x; x++) {
+			if (m->at(x, y) != TILE_EMPTY)
+				continue;
+
 			vec2 p0(to_vec2(ivec2(x, y)));
-			vec2 p1(p0 + vec2(1.0f));
+			vec2 p1(p0 + 1.0f);
 
-			colour c(0);
-
-			switch(m->at(x, y)) {
-				case TILE_EMPTY: c = colour(0.1f, 1.0f); break;
-			}
-
-			draw_rect(p0, p1, c);
+			draw_rect(p0, p1, colour(0.1f, 1.0f));
 		}
 	}
 
@@ -163,7 +160,8 @@ void render_map(map* m, player_state* gs) {
 
 		// blocks
 
-		colour fade = (i == gs->active_worm) ? colour(1.0f, 1.0f) : colour(0.65f, 1.0f);
+		float flash = fabsf(sinf((fx->pulse[i] / 0.2f) * PI * 2.0f)) * 0.25f;
+		colour fade = (i == gs->active_worm) ? colour(1.0f - flash, 1.0f) : colour(0.65f - flash, 1.0f);
 
 		for(int j = 0; j < w->num_blocks; j++) {
 			worm_block* b = w->blocks + j;

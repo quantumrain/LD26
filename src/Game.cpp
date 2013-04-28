@@ -12,6 +12,7 @@ enum game_state {
 
 game_state g_gs;
 player_state g_ps;
+map_effects g_map_fx;
 map g_map;
 int g_level_num = 0;
 float g_state_time;
@@ -50,7 +51,7 @@ void set_active_worm(player_state* ps, int num) {
 	ps->active_worm = num;
 }
 
-void move_worm(map* m, player_state* ps, ivec2 dir) {
+void move_worm(map* m, player_state* ps, map_effects* fx, ivec2 dir) {
 	worm* w = ps->worms + ps->active_worm;
 	worm_block* curr_block = w->blocks + w->active_block;
 	ivec2 target_pos = curr_block->pos + dir;
@@ -65,7 +66,9 @@ void move_worm(map* m, player_state* ps, ivec2 dir) {
 	}
 
 	if (!is_open_tile(m, ps, target_pos)) {
-		SoundPlay(kSid_Dit, 0.5f, 0.25f); // TODO: Blocked effect
+		SoundPlay(kSid_Dit, 0.5f, 0.25f);
+		spawn_effect(EFFECT_COLLIDE, curr_block->pos, dir, m->colours[ps->active_worm]);
+		fx->pulse[ps->active_worm] = 0.2f;
 		return;
 	}
 
@@ -73,17 +76,20 @@ void move_worm(map* m, player_state* ps, ivec2 dir) {
 	
 	const int MAX_BAD_ANCHORS = MAX_WORMS * 2;
 	ivec2 bad_anchors[MAX_BAD_ANCHORS];
-	colour bad_anchor_colours[MAX_BAD_ANCHORS];
+	int bad_anchor_worm[MAX_BAD_ANCHORS];
 	int num_bad_anchors = 0;
 
 	for(;;) {
 		int candidate = next_oldest_block(w, age);
 
 		if (candidate < 0) {
-			SoundPlay(kSid_Buzz, 0.75f, 0.25f); // TODO: No candidates effect
+			SoundPlay(kSid_Buzz, 0.75f, 0.25f);
 
-			for(int i = 0; i < num_bad_anchors; i++)
-				effect_anchor_flash(bad_anchors[i], bad_anchor_colours[i]);
+			for(int i = 0; i < num_bad_anchors; i++) {
+				int wi = bad_anchor_worm[i];
+				spawn_effect(EFFECT_ANCHOR_FLASH, bad_anchors[i], ivec2(1, 0), m->colours[wi]);
+				fx->pulse[wi] = 0.2f;
+			}
 
 			return;
 		}
@@ -115,7 +121,7 @@ void move_worm(map* m, player_state* ps, ivec2 dir) {
 
 					if (anchor >= 0) {
 						bad_anchors[num_bad_anchors] = old_w->blocks[anchor].pos;
-						bad_anchor_colours[num_bad_anchors] = m->colours[i];
+						bad_anchor_worm[num_bad_anchors] = i;
 						num_bad_anchors++;
 					}
 				}
@@ -144,7 +150,7 @@ bool has_won(map* m, player_state* ps) {
 	return true;
 }
 
-void update_game(map* m, player_state* ps) {
+void update_game(map* m, player_state* ps, map_effects* fx) {
 	switch(g_gs) {
 		case GS_PLAYING:
 			if (gKey >= KEY_1 && gKey <= KEY_0) {
@@ -155,10 +161,10 @@ void update_game(map* m, player_state* ps) {
 			if (gKey == KEY_FIRE) set_active_worm(ps, (ps->active_worm + 1) % ps->num_worms);
 			if (gKey == KEY_ALT_FIRE) set_active_worm(ps, (ps->active_worm + ps->num_worms - 1) % ps->num_worms);
 
-			if (gKey == KEY_LEFT) move_worm(m, ps, ivec2(-1, 0));
-			if (gKey == KEY_RIGHT) move_worm(m, ps, ivec2(1, 0));
-			if (gKey == KEY_UP) move_worm(m, ps, ivec2(0, -1));
-			if (gKey == KEY_DOWN) move_worm(m, ps, ivec2(0, 1));
+			if (gKey == KEY_LEFT) move_worm(m, ps, fx, ivec2(-1, 0));
+			if (gKey == KEY_RIGHT) move_worm(m, ps, fx, ivec2(1, 0));
+			if (gKey == KEY_UP) move_worm(m, ps, fx, ivec2(0, -1));
+			if (gKey == KEY_DOWN) move_worm(m, ps, fx, ivec2(0, 1));
 
 			if (gKey == KEY_CHEAT) {
 				g_level_num++;
@@ -205,7 +211,8 @@ void GameInit() {
 }
 
 void GameUpdate() {
-	update_game(&g_map, &g_ps);
+	update_game(&g_map, &g_ps, &g_map_fx);
+	update_map_effects(&g_map_fx);
 	update_effects();
 
 	vec2 size(to_vec2(g_map.br - g_map.tl));
@@ -225,6 +232,6 @@ void GameUpdate() {
 	}
 
 	set_camera(cam_pos, width);
-	render_map(&g_map, &g_ps);
+	render_map(&g_map, &g_ps, &g_map_fx);
 	render_effects();
 }

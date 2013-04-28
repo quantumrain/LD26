@@ -2,6 +2,7 @@
 #define COMMON_H
 
 const float DT = 1.0f / 60.0f;
+const float PI = 3.14159f;
 
 template<typename T> T Max(T a, T b) { return (b < a) ? a : b; }
 template<typename T> T Min(T a, T b) { return (a < b) ? a : b; }
@@ -174,7 +175,7 @@ namespace gpu
 	void SetDefaultRenderTarget();
 	void SetPsConst(int slot, vec4 v);
 	void SetVsConst(int slot, vec4 v);
-	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count, bool alpha_blend);
+	void Draw(ShaderDecl* decl, VertexBuffer* vb, int count, bool alpha_blend, bool as_lines);
 
 }
 
@@ -190,6 +191,7 @@ struct Vertex
 void set_camera(vec2 centre, float width);
 void draw_rect(vec2 p0, vec2 p1, colour c);
 void draw_rect(vec2 p0, vec2 p1, colour c0, colour c1, colour c2, colour c3);
+void draw_quad(vec2 p0, vec2 p1, vec2 p2, vec2 p3, colour c0, colour c1, colour c2, colour c3);
 
 // Sound
 
