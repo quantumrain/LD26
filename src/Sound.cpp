@@ -161,6 +161,9 @@ void SoundInit()
 
 void SoundShutdown()
 {
+	if (!gXAudio)
+		return;
+
 	for(int i = 0; i < kSid_Max; i++)
 	{
 		Sound& sound = gSound[i];
@@ -178,6 +181,9 @@ void SoundShutdown()
 
 void SoundPlay(SoundId sid, float freq, float volume)
 {
+	if (!gXAudio)
+		return;
+
 	Sound& sound = gSound[sid];
 
 	if (sound.pSourceVoice)

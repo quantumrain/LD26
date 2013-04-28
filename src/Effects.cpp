@@ -9,15 +9,36 @@ map_effects::map_effects() {
 }
 
 void map_effects::reset() {
-	for(int i = 0; i < MAX_WORMS; i++)
+	for(int i = 0; i < MAX_WORMS; i++) {
 		pulse[i] = 0.0f;
+		jink[i] = vec2();
+		target_active[i] = 0.0f;
+	}
+
+	win = 0.0f;
 }
 
-void update_map_effects(map_effects* fx) {
-	for(int i = 0; i < MAX_WORMS; i++) {
+void update_map_effects(map* m, player_state* ps, map_effects* fx) {
+	for(int i = 0; i < ps->num_worms; i++) {
 		float& f = fx->pulse[i];
+		vec2& j = fx->jink[i];
+		float& t = fx->target_active[i];
 
 		f = Max(f - DT, 0.0f);
+		j *= 0.8f;
+
+		ivec2 tp = m->targets[i];
+
+		if (
+			(block_at(ps->worms + i, tp + ivec2(-1, 0)) >= 0) ||
+			(block_at(ps->worms + i, tp + ivec2(1, 0)) >= 0) ||
+			(block_at(ps->worms + i, tp + ivec2(0, -1)) >= 0) ||
+			(block_at(ps->worms + i, tp + ivec2(0, 1)) >= 0)
+		) {
+			t = Lerp(t, 1.0f, 0.2f);
+		} else {
+			t = Lerp(t, 0.0f, 0.2f);
+		}
 	}
 }
 
@@ -79,7 +100,7 @@ void render_effects() {
 				colour c1(e->col.r * inv_f, e->col.g * inv_f, e->col.b * inv_f, 0.0f);
 				colour c2(e->col * inv_f);
 
-				draw_rect(pos + vec2(0.0f, 0.75f), pos + vec2(1.0f, 1.0f), c0, c0, c1, c1);
+				draw_rect(pos + vec2(0.0f, 0.85f), pos + vec2(1.0f, 1.0f), c0, c0, c1, c1);
 				draw_rect(pos + vec2(0.0f, 1.0f), pos + vec2(1.0f, 1.1f), c2, c2, c0, c0);
 			}
 			break;
@@ -90,12 +111,12 @@ void render_effects() {
 				float inv_f = 1.0f - Square(f);
 
 				colour c0(0.0f);
-				colour c1(1.0f, 0.0f, 0.0f, inv_f * 0.5f);
+				colour c1(e->col.r * inv_f, e->col.g * inv_f, e->col.b * inv_f, inv_f * 0.75f);
 
-				if (e->dir.x < 0) draw_rect(pos + vec2(0.0f, 0.0f), pos + vec2(0.15f, 1.0f), c1, c0, c1, c0);
-				if (e->dir.x > 0) draw_rect(pos + vec2(0.85f, 0.0f), pos + vec2(1.0f, 1.0f), c0, c1, c0, c1);
-				if (e->dir.y < 0) draw_rect(pos + vec2(0.0f, 0.0f), pos + vec2(1.0f, 0.15f), c1, c1, c0, c0);
-				if (e->dir.y > 0) draw_rect(pos + vec2(0.0f, 0.85f), pos + vec2(1.0f, 1.0f), c0, c0, c1, c1);
+				if (e->dir.x < 0) draw_rect(pos + vec2(0.0f, 0.0f), pos + vec2(0.1f, 1.0f), c1, c0, c1, c0);
+				if (e->dir.x > 0) draw_rect(pos + vec2(0.9f, 0.0f), pos + vec2(1.0f, 1.0f), c0, c1, c0, c1);
+				if (e->dir.y < 0) draw_rect(pos + vec2(0.0f, 0.0f), pos + vec2(1.0f, 0.1f), c1, c1, c0, c0);
+				if (e->dir.y > 0) draw_rect(pos + vec2(0.0f, 0.9f), pos + vec2(1.0f, 1.0f), c0, c0, c1, c1);
 			}
 			break;
 		}

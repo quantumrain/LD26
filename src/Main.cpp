@@ -2,32 +2,66 @@
 #include "Common.h"
 #include "resource.h"
 
-int kWinWidth	= 1152;
-int kWinHeight	= 640;
+int g_WinWidth = 1152;
+int g_WinHeight	= 640;
+
+HWND gMainWnd;
+
+IDirect3D9* gD3d;
+IDirect3DDevice9* gDevice;
 
 bool gHasFocus;
 int gKey;
 
-void DebugLn(const char* txt, ...)
+void RenderInit();
+void RenderShutdown();
+
+void GetPresentParams(D3DPRESENT_PARAMETERS* pp)
 {
-	char buf[512];
+	RECT rc;
+	GetClientRect(gMainWnd, &rc);
 
-	va_list ap;
+	g_WinWidth = Max<int>(rc.right - rc.left, 16);
+	g_WinHeight = Max<int>(rc.bottom - rc.top, 16);
 
-	va_start(ap, txt);
-	_vsnprintf_s(buf, sizeof(buf), _TRUNCATE, txt, ap);
-	va_end(ap);
-
-	OutputDebugStringA(buf);
-	OutputDebugStringA("\r\n");
+	pp->Windowed				= TRUE;
+	pp->SwapEffect				= D3DSWAPEFFECT_DISCARD;
+	pp->BackBufferWidth			= g_WinWidth;
+	pp->BackBufferHeight		= g_WinHeight;
+	pp->BackBufferFormat		= D3DFMT_A8R8G8B8;
+	pp->hDeviceWindow			= gMainWnd;
+	pp->PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
 }
 
-HWND gMainWnd;
-
-void Panic(const char* msg)
+void ResetDevice()
 {
-	MessageBoxA(gMainWnd, msg, "LD26 - Gravity Worm", MB_ICONERROR | MB_OK);
-	ExitProcess(0);
+	if (gDevice) {
+		D3DPRESENT_PARAMETERS pp = { };
+		GetPresentParams(&pp);
+		gDevice->Reset(&pp);
+	}
+}
+
+void DoFrame()
+{
+	if (gDevice)
+	{
+		gDevice->BeginScene();
+
+		void RenderPreUpdate();
+		RenderPreUpdate();
+
+		void GameUpdate();
+		GameUpdate();
+
+		void RenderGame();
+		RenderGame();
+
+		gKey = 0;
+
+		gDevice->EndScene();
+		gDevice->Present(0, 0, 0, 0);
+	}
 }
 
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -84,6 +118,18 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			}
 		return 0;
 
+		case WM_SIZE:
+			RenderShutdown();
+			gpu::Shutdown();
+
+			ResetDevice();
+
+			gpu::Init();
+			RenderInit();
+
+			DoFrame();
+		return 0;
+
 		case WM_CLOSE:
 			PostQuitMessage(0);
 		return 0;
@@ -91,9 +137,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
-
-IDirect3D9* gD3d;
-IDirect3DDevice9* gDevice;
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -108,16 +151,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	RegisterClassEx(&wc);
 
-	DWORD	style	= WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
-	DWORD	styleEx = WS_EX_WINDOWEDGE;
-	RECT	rcWin	= { 0, 0, kWinWidth, kWinHeight };
+	DWORD	style	= WS_OVERLAPPEDWINDOW;
+	DWORD	styleEx = WS_EX_OVERLAPPEDWINDOW;
+	RECT	rcWin	= { 0, 0, g_WinWidth, g_WinHeight };
+
+	RECT rcDesk;
+	GetClientRect(GetDesktopWindow(), &rcDesk);
 
 	AdjustWindowRectEx(&rcWin, style, FALSE, styleEx);
-	OffsetRect(&rcWin, 100, 100);
+	OffsetRect(&rcWin, ((rcDesk.right - rcDesk.left) - g_WinWidth) / 2, ((rcDesk.bottom - rcDesk.top) - g_WinHeight) / 2);
 
 	gMainWnd = CreateWindowEx(styleEx, wc.lpszClassName, L"LD26 - Gravity Worm", style, rcWin.left, rcWin.top, rcWin.right - rcWin.left, rcWin.bottom - rcWin.top, 0, 0, 0, 0);
-
-	ShowWindow(gMainWnd, SW_SHOWNORMAL);
 
 	// Graphics
 
@@ -128,13 +172,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	D3DPRESENT_PARAMETERS pp = { };
 
-	pp.Windowed			= TRUE;
-	pp.SwapEffect		= D3DSWAPEFFECT_DISCARD;
-	pp.BackBufferWidth	= kWinWidth;
-	pp.BackBufferHeight	= kWinHeight;
-	pp.BackBufferFormat	= D3DFMT_A8R8G8B8;
-	pp.hDeviceWindow	= gMainWnd;
-	pp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+	GetPresentParams(&pp);
 
 	if (FAILED(gD3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, gMainWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &pp, &gDevice)))
 	{
@@ -142,10 +180,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	gpu::Init();
-
-	// Audio
-
-	SoundInit();
 
 	// Keys
 
@@ -157,11 +191,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// Main
 
-	void RenderInit();
 	RenderInit();
 
 	void GameInit();
 	GameInit();
+
+	ShowWindow(gMainWnd, SW_SHOWNORMAL);
+
+	// Audio
+	
+	SoundInit();
 
 	for(;;)
 	{
@@ -176,28 +215,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		else
 		{
-			if (gDevice)
-			{
-				gDevice->BeginScene();
-
-				void RenderPreUpdate();
-				RenderPreUpdate();
-
-				void GameUpdate();
-				GameUpdate();
-
-				void RenderGame();
-				RenderGame();
-
-				gKey = 0;
-
-				gDevice->EndScene();
-				gDevice->Present(0, 0, 0, 0);
-			}
-
+			DoFrame();
 			Sleep(gHasFocus ? 0 : 250);
 		}
 	}
+
+	ShowWindow(gMainWnd, SW_HIDE);
+	ExitProcess(0);
 	
 	gDevice->SetVertexDeclaration(0);
 	gDevice->SetVertexShader(0);
@@ -206,7 +230,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	SoundShutdown();
 
-	void RenderShutdown();
 	RenderShutdown();
 
 	gDevice->Release();

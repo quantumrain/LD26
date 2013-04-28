@@ -17,16 +17,20 @@ int block_at(worm* w, ivec2 pos) {
 	return -1;
 }
 
+int worm_at(player_state* ps, ivec2 pos) {
+	for(int i = 0; i < ps->num_worms; i++) {
+		if (block_at(ps->worms + i, pos) >= 0)
+			return i;
+	}
+
+	return -1;
+}
+
 bool is_open_tile(map* m, player_state* ps, ivec2 pos) {
 	if (m->at(pos.x, pos.y) != TILE_EMPTY)
 		return false;
 
-	for(int i = 0; i < ps->num_worms; i++) {
-		if (block_at(ps->worms + i, pos) >= 0)
-			return false;
-	}
-
-	return true;
+	return worm_at(ps, pos) < 0;
 }
 
 int next_oldest_block(worm* w, int min_age) {

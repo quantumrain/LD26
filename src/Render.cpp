@@ -22,7 +22,7 @@ int gRectVertCount;
 vec4 gCam;
 
 void set_camera(vec2 centre, float width) {
-	float ratio = kWinHeight / (float)kWinWidth;
+	float ratio = g_WinHeight / (float)g_WinWidth;
 	gCam = vec4(-centre, 1.0f / vec2(width, -width * ratio));
 }
 
@@ -277,17 +277,16 @@ gpu::Texture2d* g_draw_target;
 
 void RenderInit()
 {
+	gRectDecl		= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_quad_ps, sizeof(g_quad_ps));
+	gReduceDecl		= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_reduce_ps, sizeof(g_reduce_ps));
+	gBlurXDecl		= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_blur_x_ps, sizeof(g_blur_x_ps));
+	gBlurYDecl		= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_blur_y_ps, sizeof(g_blur_y_ps));
+	gCombineDecl	= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_combine_ps, sizeof(g_combine_ps));
+
 	gRectVb		= gpu::CreateVertexBuffer(sizeof(Vertex), kMaxRectVerts);
-	gRectDecl	= gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_quad_ps, sizeof(g_quad_ps));
+	gFsQuadVb	= gpu::CreateVertexBuffer(sizeof(Vertex), 3);
 
-	gFsQuadVb = gpu::CreateVertexBuffer(sizeof(Vertex), 3);
-
-	gReduceDecl = gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_reduce_ps, sizeof(g_reduce_ps));
-	gBlurXDecl = gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_blur_x_ps, sizeof(g_blur_x_ps));
-	gBlurYDecl = gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_blur_y_ps, sizeof(g_blur_y_ps));
-	gCombineDecl = gpu::CreateShaderDecl(g_quad_vs, sizeof(g_quad_vs), g_combine_ps, sizeof(g_combine_ps));
-
-	ivec2 size(kWinWidth, kWinHeight);
+	ivec2 size(g_WinWidth, g_WinHeight);
 
 	g_draw_target = gpu::CreateTexture2d(size.x, size.y);
 
@@ -305,8 +304,19 @@ void RenderInit()
 
 void RenderShutdown()
 {
-	gpu::DestroyVertexBuffer(gRectVb);
 	gpu::DestroyShaderDecl(gRectDecl);
+	gpu::DestroyShaderDecl(gReduceDecl);
+	gpu::DestroyShaderDecl(gBlurXDecl);
+	gpu::DestroyShaderDecl(gBlurYDecl);
+	gpu::DestroyShaderDecl(gCombineDecl);
+
+	gpu::DestroyVertexBuffer(gRectVb);
+	gpu::DestroyVertexBuffer(gFsQuadVb);
+
+	gpu::DestroyTexture2d(g_draw_target);
+
+	for(int i = 0; i < MAX_BLOOM_LEVELS; i++)
+		g_bloom_levels[i].destroy();
 }
 
 void RenderPreUpdate()
@@ -357,7 +367,7 @@ void RenderGame()
 
 	// draw
 	gpu::SetRenderTarget(g_draw_target);
-	gpu::SetViewport(ivec2(0, 0), ivec2(kWinWidth, kWinHeight), vec2(0.0f, 1.0f));
+	gpu::SetViewport(ivec2(0, 0), ivec2(g_WinWidth, g_WinHeight), vec2(0.0f, 1.0f));
 	gpu::Clear(0x00000000);
 	gpu::SetVsConst(0, gCam);
 	gpu::Draw(gRectDecl, gRectVb, gRectVertCount, true, false);
@@ -392,7 +402,7 @@ void RenderGame()
 
 	// combine
 	gpu::SetDefaultRenderTarget();
-	gpu::SetViewport(ivec2(0, 0), ivec2(kWinWidth, kWinHeight), vec2(0.0f, 1.0f));
+	gpu::SetViewport(ivec2(0, 0), ivec2(g_WinWidth, g_WinHeight), vec2(0.0f, 1.0f));
 	gpu::SetPsConst(0, vec4(500.0f) + vec4(FRand(1000.0f), FRand(1000.0f), FRand(1000.0f), FRand(1000.0f)));
 	gpu::SetTexture(0, g_draw_target);
 	gpu::SetSampler(0, true, false);
@@ -400,5 +410,5 @@ void RenderGame()
 		gpu::SetTexture(1 + i, g_bloom_levels[i].blur_y);
 		gpu::SetSampler(1 + i, true, true);
 	}
-	do_fullscreen_quad(gCombineDecl, to_vec2(ivec2(kWinWidth, kWinHeight)));
+	do_fullscreen_quad(gCombineDecl, to_vec2(ivec2(g_WinWidth, g_WinHeight)));
 }

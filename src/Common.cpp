@@ -1,6 +1,28 @@
 #include "Pch.h"
 #include "Common.h"
 
+extern HWND gMainWnd;
+
+void DebugLn(const char* txt, ...)
+{
+	char buf[512];
+
+	va_list ap;
+
+	va_start(ap, txt);
+	_vsnprintf_s(buf, sizeof(buf), _TRUNCATE, txt, ap);
+	va_end(ap);
+
+	OutputDebugStringA(buf);
+	OutputDebugStringA("\r\n");
+}
+
+void Panic(const char* msg)
+{
+	MessageBoxA(gMainWnd, msg, "LD26 - Gravity Worm", MB_ICONERROR | MB_OK);
+	ExitProcess(0);
+}
+
 int hash(const uint8_t* data, int size) {
 	int h = 5381;
 

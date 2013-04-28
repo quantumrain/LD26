@@ -145,8 +145,8 @@ void Panic(const char* msg);
 
 // Gpu
 
-extern int kWinWidth;
-extern int kWinHeight;
+extern int g_WinWidth;
+extern int g_WinHeight;
 
 namespace gpu
 {
@@ -169,6 +169,8 @@ namespace gpu
 	void SetTexture(int slot, Texture2d* tex);
 
 	void Init();
+	void Shutdown();
+
 	void Clear(uint32_t col);
 	void SetViewport(ivec2 pos, ivec2 size, vec2 depth);
 	void SetRenderTarget(Texture2d* tex);

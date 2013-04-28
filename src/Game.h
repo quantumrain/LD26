@@ -58,6 +58,9 @@ struct player_state {
 
 struct map_effects {
 	float pulse[MAX_WORMS];
+	vec2 jink[MAX_WORMS];
+	float target_active[MAX_WORMS];
+	float win;
 
 	map_effects();
 
@@ -67,7 +70,7 @@ struct map_effects {
 enum effect_type {
 	EFFECT_NONE,
 	EFFECT_ANCHOR_FLASH,
-	EFFECT_COLLIDE
+	EFFECT_COLLIDE,
 };
 
 vec2 to_screen(ivec2 v);
@@ -75,13 +78,14 @@ bool load_map(map* m, player_state* gs, const char* path);
 void render_map(map* m, player_state* gs, map_effects* fx);
 
 int block_at(worm* w, ivec2 pos);
+int worm_at(player_state* ps, ivec2 pos);
 bool is_open_tile(map* m, player_state* gs, ivec2 pos);
 int next_oldest_block(worm* w, int min_age);
 bool is_worm_split(map* m, player_state* ps, worm* w);
 int anchor_block(map* m, player_state* ps, worm* w);
 bool all_worms_anchored(map* m, player_state* gs);
 
-void update_map_effects(map_effects* fx);
+void update_map_effects(map* m, player_state* ps, map_effects* fx);
 void spawn_effect(effect_type type, ivec2 pos, ivec2 dir, colour col);
 void update_effects();
 void render_effects();

@@ -140,8 +140,9 @@ bool load_map(map* m, player_state* gs, const char* path) {
 	return true;
 }
 
-void render_map(map* m, player_state* gs, map_effects* fx) {
+void render_map(map* m, player_state* ps, map_effects* fx) {
 	ivec2 size = m->size;
+	colour c(Lerp(0.1f, 0.0f, Min(fx->win, 1.0f)), 1.0f);
 
 	for(int y = 0; y < size.y; y++) {
 		for(int x = 0; x < size.x; x++) {
@@ -151,17 +152,23 @@ void render_map(map* m, player_state* gs, map_effects* fx) {
 			vec2 p0(to_vec2(ivec2(x, y)));
 			vec2 p1(p0 + 1.0f);
 
-			draw_rect(p0, p1, colour(0.1f, 1.0f));
+			draw_rect(p0, p1, c);
 		}
 	}
 
-	for(int i = 0; i < gs->num_worms; i++) {
-		worm* w = gs->worms + i;
+	for(int i = 0; i < ps->num_worms; i++) {
+		worm* w = ps->worms + i;
 
 		// blocks
 
-		float flash = fabsf(sinf((fx->pulse[i] / 0.2f) * PI * 2.0f)) * 0.25f;
-		colour fade = (i == gs->active_worm) ? colour(1.0f - flash, 1.0f) : colour(0.65f - flash, 1.0f);
+		colour fade;
+
+		if (fx->win > 0.0f) {
+			fade = colour(1.0f + fx->win, 1.0f);
+		} else {
+			float flash = fabsf(sinf((fx->pulse[i] / 0.2f) * PI * 2.0f)) * 0.25f;
+			fade = (i == ps->active_worm) ? colour(1.0f - flash, 1.0f) : colour(0.65f - flash, 1.0f);
+		}
 
 		for(int j = 0; j < w->num_blocks; j++) {
 			worm_block* b = w->blocks + j;
@@ -176,21 +183,45 @@ void render_map(map* m, player_state* gs, map_effects* fx) {
 
 		{
 			worm_block* b = w->blocks + w->active_block;
+			colour fade_off(Max(1.0f - fx->win, 0.0f));
 
-			vec2 p0(to_vec2(ivec2(b->pos)) + vec2(0.25f));
-			vec2 p1(p0 + vec2(0.5f));
-			colour col = (gs->active_worm == i) ? colour(0.0f, 0.55f) : colour(0.0f, 0.1f);
+			{
+				vec2 p0(to_vec2(ivec2(b->pos)) + vec2(0.25f) + fx->jink[i]);
+				vec2 p1(p0 + vec2(0.5f));
+				colour col = (ps->active_worm == i) ? colour(0.0f, 0.55f) : colour(0.0f, 0.1f);
 
-			draw_rect(p0, p1, col);
+				draw_rect(p0, p1, col * fade_off);
+			}
+
+			if (ps->active_worm == i) {
+				vec2 p0(to_vec2(ivec2(b->pos)) + vec2(0.375f) + fx->jink[i]);
+				vec2 p1(p0 + vec2(0.25f));
+				colour col = (ps->active_worm == i) ? colour(0.0f, 0.275f) : colour(0.0f, 0.1f);
+
+				draw_rect(p0, p1, col * fade_off);
+			}
 		}
 
 		// target
 
 		{
-			vec2 p0(to_vec2(ivec2(m->targets[i])) + vec2(0.1f));
-			vec2 p1(p0 + vec2(0.8f));
+			ivec2 tp = m->targets[i];
+			vec2 p0(to_vec2(tp));
+			vec2 p1(p0);
+			colour c(m->colours[i]);
+			float t = 0.5f;
 
-			draw_rect(p0, p1, m->colours[i] * colour(1.0f, 0.65f));
+			if (fx->win > 0.0f)
+				c = c * (1.0f + fx->win);
+			else
+				c = c * colour(Lerp(0.35f, 1.0f, fx->target_active[i]), 0.65f);
+
+			if (m->at(tp.x - 1, tp.y) == TILE_EMPTY) { p0 += vec2(0.1f, 0.1f);		p1 += vec2(t, 0.9f); }
+			if (m->at(tp.x + 1, tp.y) == TILE_EMPTY) { p0 += vec2(1.0f - t, 0.1f);	p1 += vec2(0.9f, 0.9f); }
+			if (m->at(tp.x, tp.y - 1) == TILE_EMPTY) { p0 += vec2(0.1f, 0.1f);		p1 += vec2(0.9f, t); }
+			if (m->at(tp.x, tp.y + 1) == TILE_EMPTY) { p0 += vec2(0.1f, 1.0f - t);	p1 += vec2(0.9f, 0.9f); }
+
+			draw_rect(p0, p1 , c);
 		}
 	}
 }

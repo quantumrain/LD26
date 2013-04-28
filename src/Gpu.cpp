@@ -166,6 +166,11 @@ namespace gpu
 		gDevice->GetRenderTarget(0, &g_default_render_target);
 	}
 
+	void Shutdown()
+	{
+		g_default_render_target->Release();
+	}
+
 	void Clear(uint32_t col)
 	{
 		gDevice->Clear(0, 0, D3DCLEAR_TARGET, col, 1.0f, 0);
