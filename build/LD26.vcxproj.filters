@@ -99,5 +99,8 @@
     <Text Include="..\data\map5.txt">
       <Filter>maps</Filter>
     </Text>
+    <Text Include="..\data\map6.txt">
+      <Filter>maps</Filter>
+    </Text>
   </ItemGroup>
 </Project>
