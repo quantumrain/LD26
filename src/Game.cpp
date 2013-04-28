@@ -3,6 +3,8 @@
 #include "Game.h"
 
 enum game_state {
+	GS_TITLE,
+	GS_COMPLETE,
 	GS_PLAYING,
 	GS_LEVEL_INTRO,
 	GS_LEVEL_OUTRO,
@@ -265,6 +267,22 @@ void update_game_play(map* m, player_state* ps, map_effects* fx) {
 
 void update_game(map* m, player_state* ps, map_effects* fx) {
 	switch(g_gs) {
+		case GS_TITLE:
+			if (gKey == KEY_FIRE)
+				g_state_time = Max(g_state_time, 3.0f);
+
+			if (gKey == KEY_CHEAT)
+				change_game_state(GS_LEVEL_INTRO);
+
+			if ((g_state_time += DT) > 4.0f)
+				change_game_state(GS_LEVEL_INTRO);
+		break;
+
+		case GS_COMPLETE:
+			if ((g_state_time += DT) > 4.0f)
+				PostQuitMessage(0);
+		break;
+
 		case GS_PLAYING:
 			update_game_play(m, ps, fx);
 		break;
@@ -281,7 +299,10 @@ void update_game(map* m, player_state* ps, map_effects* fx) {
 		case GS_LEVEL_OUTRO:
 			g_map_fx.win += DT;
 			if ((g_state_time += DT) >= 1.5f) {
-				change_game_state(GS_LEVEL_INTRO);
+				if (g_level_num >= 10)
+					change_game_state(GS_COMPLETE);
+				else
+					change_game_state(GS_LEVEL_INTRO);
 			}
 		break;
 
@@ -302,7 +323,7 @@ void update_game(map* m, player_state* ps, map_effects* fx) {
 void GameInit() {
 	void init_colours();
 	init_colours();
-	change_game_state(GS_LEVEL_INTRO);
+	change_game_state(GS_TITLE);
 }
 
 void GameUpdate() {
@@ -310,17 +331,36 @@ void GameUpdate() {
 	update_map_effects(&g_map, &g_ps, &g_map_fx);
 	update_effects();
 
-	vec2 size(to_vec2(g_map.br - g_map.tl));
-	vec2 centre(to_vec2(g_map.br + g_map.tl) * vec2(0.5f, 0.5f));
+	if (g_gs == GS_TITLE) {
+		set_camera(vec2(), 10.0f);
+		draw_string(vec2(0.0f, -1.0f), vec2(0.1f), TEXT_CENTRE, colour(), "Gravity Worm");
+		draw_string(vec2(0.0f, 3.0f), vec2(0.04f), TEXT_CENTRE, colour(0.5f), "Created for Ludum Dare 26: Minimalism");
+		draw_string(vec2(0.0f, 3.5f), vec2(0.04f), TEXT_CENTRE, colour(0.5f), "by Stephen Cakebread");
+		draw_string(vec2(0.0f, 4.0f), vec2(0.04f), TEXT_CENTRE, colour(0.5f), "t: @quantumrain");
+	} else if (g_gs == GS_COMPLETE) {
+		set_camera(vec2(), 10.0f);
+		draw_string(vec2(0.0f, -1.0f), vec2(0.1f), TEXT_CENTRE, colour(), "Success");
+	} else {
+		vec2 size(to_vec2(g_map.br - g_map.tl));
+		vec2 centre(to_vec2(g_map.br + g_map.tl) * vec2(0.5f, 0.5f));
 
-	vec2 cam_pos = centre;
-	float width = 10.0f;
+		vec2 cam_pos = centre;
+		float width = 10.0f;
 
-	set_camera(cam_pos, width);
-	render_map(&g_map, &g_ps, &g_map_fx);
-	render_effects();
+		set_camera(cam_pos, width);
+		render_map(&g_map, &g_ps, &g_map_fx);
+		render_effects();
+	}
 
 	switch(g_gs) {
+		case GS_TITLE:
+			set_tint(colour(1.0f - Max(g_state_time - 3.0f, 0.0f)));
+		break;
+
+		case GS_COMPLETE:
+			set_tint(colour(Max(g_state_time - 0.5f, 0.0f) / 1.5f));
+		break;
+
 		case GS_LEVEL_INTRO:
 			set_tint(colour(Max(g_state_time - 0.5f, 0.0f) / 1.5f));
 		break;
@@ -333,6 +373,4 @@ void GameUpdate() {
 			set_tint(colour());
 		break;
 	}
-
-	draw_string(vec2(), vec2(0.1f), TEXT_CENTRE, colour(), "Hello");
 }
